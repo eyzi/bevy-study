@@ -1,0 +1,23 @@
+[package]
+name = "bevy-study"
+version = "0.1.0"
+edition = "2021"
+authors = ["eyzi <contact@eyzi.dev>"]
+readme = "README.md"
+license = "MIT"
+license-file = "LICENSE"
+keywords = ["bevy", "gamedev"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "0.8.1"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = "thin"
