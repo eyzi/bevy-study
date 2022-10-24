@@ -1,5 +1,8 @@
 # Space Invade.rs
 
+Space Invaders game implementation using guide by
+[TheBracket](https://rustrepo.com/repo/thebracket-bevy-test)
+
 ## Usage
 ```
 cargo run --example space-invaders

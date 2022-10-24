@@ -1,4 +1,7 @@
-# Space Invade.rs
+# Snake
+
+Snake game implementation using guide by
+[mbuffet](https://mbuffett.com/posts/bevy-snake-tutorial/)
 
 ## Usage
 ```
