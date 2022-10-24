@@ -10,3 +10,4 @@ cargo run --example <game>
 ## Game List
 - [space-invader](https://github.com/eyzi/bevy-study/tree/main/examples/space-invaders)
 - [snake](https://github.com/eyzi/bevy-study/tree/main/examples/snake)
+- [minesweeper](https://github.com/eyzi/bevy-study/tree/main/examples/minesweeper)
