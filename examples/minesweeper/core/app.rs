@@ -20,15 +20,20 @@ pub fn start() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
-        .add_plugin(MinesweeperBoard {
-            running_state: AppState::InGame,
-        })
-        .add_state(AppState::Out)
         .insert_resource(BoardOptions {
             map_size: (20, 20),
             bomb_count: 40,
             tile_padding: 3.,
             ..default()
         })
+        .add_plugin(MinesweeperBoard {
+            running_state: AppState::InGame,
+        })
+        .add_state(AppState::Out)
+        .add_startup_system(setup_camera)
         .run();
+}
+
+fn setup_camera(mut commands: Commands) {
+    commands.spawn().insert_bundle(Camera2dBundle::default());
 }
