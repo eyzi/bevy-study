@@ -71,7 +71,7 @@ fn setup(
                 -((HEIGHT / 2.0) - Y_MARGIN),
                 0.0,
             )),
-            ..Default::default()
+            ..default()
         });
 
     for enemy_row in 0..4 {
