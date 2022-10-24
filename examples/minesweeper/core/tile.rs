@@ -1,12 +1,15 @@
 use bevy::prelude::*;
 
-#[derive(Component)]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
 pub struct Bomb;
 
-#[derive(Component)]
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
 pub struct BombNeighbor {
     pub count: u8,
 }
+
+#[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Component)]
+pub struct Uncover;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Tile {
