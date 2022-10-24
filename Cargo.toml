@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 authors = ["eyzi <contact@eyzi.dev>"]
 readme = "README.md"
-license = "MIT"
 license-file = "LICENSE"
 keywords = ["bevy", "gamedev"]
 
@@ -12,6 +11,7 @@ keywords = ["bevy", "gamedev"]
 
 [dependencies]
 bevy = "0.8.1"
+serde = "1.0"
 rand = "0.8.5"
 
 [profile.dev.package."*"]

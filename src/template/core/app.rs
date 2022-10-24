@@ -9,7 +9,7 @@ pub fn start() {
             title: config::GAME_NAME.to_string(),
             resizable: false,
             present_mode: bevy::window::PresentMode::AutoVsync,
-            ..Default::default()
+            ..default()
         })
         .add_plugins(DefaultPlugins)
         .run();

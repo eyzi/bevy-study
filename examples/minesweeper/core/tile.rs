@@ -1,0 +1,22 @@
+use bevy::prelude::*;
+
+#[derive(Component)]
+pub struct Bomb;
+
+#[derive(Component)]
+pub struct BombNeighbor {
+    pub count: u8,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Tile {
+    Bomb,
+    BombNeighbor(u8),
+    Empty,
+}
+
+impl Tile {
+    pub const fn is_bomb(&self) -> bool {
+        matches!(self, Self::Bomb)
+    }
+}
