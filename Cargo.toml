@@ -13,6 +13,8 @@ keywords = ["bevy", "gamedev"]
 bevy = "0.8.1"
 serde = "1.0"
 rand = "0.8.5"
+winit = "0.26.1"
+image = "0.24.4"
 
 [profile.dev.package."*"]
 opt-level = 3
