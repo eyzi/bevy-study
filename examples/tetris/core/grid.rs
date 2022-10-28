@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use super::cell::Cell;
 use super::config;
 use super::tetris::*;
@@ -11,25 +9,39 @@ use bevy::sprite::Anchor;
 pub struct Grid(Vec<Vec<Cell>>);
 
 const BLANK_COLOR: Color = Color::rgb(0.06, 0.06, 0.06);
-const HALF_WINDOW_WIDTH: f32 = config::WINDOW_WIDTH / 2.;
-const HALF_WINDOW_HEIGHT: f32 = config::WINDOW_HEIGHT / 2.;
-const CELL_SIZE: f32 = 20.;
-const CELL_MARGIN: f32 = 1.;
 
 impl Grid {
     pub fn new() -> Self {
         return Grid(vec![
             vec![
                 Cell::new(BLANK_COLOR);
-                (config::WINDOW_WIDTH / CELL_SIZE) as usize
+                (config::WINDOW_WIDTH / config::CELL_SIZE) as usize
             ];
-            (config::WINDOW_HEIGHT / CELL_SIZE) as usize
+            (config::WINDOW_HEIGHT / config::CELL_SIZE) as usize
         ]);
     }
 
     pub fn set_cell(&mut self, x: usize, y: usize, cell: Cell) {
         let cells = &mut self.0;
         cells[x][y] = cell;
+    }
+
+    pub fn bottom() -> usize {
+        (((config::WINDOW_HEIGHT / config::CELL_SIZE) - config::GRID_HEIGHT as f32) / 2. - 1.)
+            as usize
+    }
+
+    pub fn left() -> usize {
+        (((config::WINDOW_WIDTH / config::CELL_SIZE) - config::GRID_WIDTH as f32) / 2. - 1.)
+            as usize
+    }
+
+    pub fn top() -> usize {
+        Grid::bottom() + config::GRID_HEIGHT as usize + 1
+    }
+
+    pub fn right() -> usize {
+        Grid::left() + config::GRID_WIDTH as usize + 1
     }
 }
 
@@ -46,14 +58,22 @@ pub fn draw_border(grid: &mut Grid) {
     let border_color = Color::rgb(0.5, 0.5, 0.5);
     let border_cell = Cell::new(border_color);
 
-    for x in 0..=21 {
-        grid.set_cell(x, 5, border_cell);
-        grid.set_cell(x, 16, border_cell);
+    let grid_bottom = Grid::bottom();
+    let grid_top = Grid::top();
+    let grid_left = Grid::left();
+    let grid_right = Grid::right();
+
+    println!("grid_bottom: {}, grid_top: {}", grid_bottom, grid_top);
+    println!("grid_left: {}, grid_right: {}", grid_left, grid_right);
+
+    for y in grid_bottom..=grid_top {
+        grid.set_cell(grid_left, y, border_cell);
+        grid.set_cell(grid_right, y, border_cell);
     }
 
-    for y in 6..=15 {
-        grid.set_cell(0, y, border_cell);
-        grid.set_cell(21, y, border_cell);
+    for x in grid_left..=grid_right {
+        grid.set_cell(x, grid_bottom, border_cell);
+        grid.set_cell(x, grid_top, border_cell);
     }
 }
 
@@ -65,39 +85,49 @@ pub fn draw(
     let mut grid = grid_query.iter_mut().next().unwrap();
     let mut tetris = tetris_query.iter_mut().next().unwrap();
 
-    for (y, rows) in grid.0.iter_mut().enumerate() {
-        for (x, cell) in rows.iter().enumerate() {
+    for (x, rows) in grid.0.iter_mut().enumerate() {
+        for (y, cell) in rows.iter().enumerate() {
             commands
                 .spawn()
                 .insert(cell.clone())
-                .insert_bundle(SpriteBundle {
-                    sprite: Sprite {
-                        color: cell.color,
-                        anchor: Anchor::Center,
-                        ..default()
-                    },
-                    transform: Transform {
-                        scale: Vec3::new(CELL_SIZE - CELL_MARGIN, CELL_SIZE - CELL_MARGIN, 1.),
-                        translation: Vec3::new(
-                            (CELL_SIZE * x as f32) - (HALF_WINDOW_WIDTH - (CELL_SIZE / 2.)),
-                            (CELL_SIZE * y as f32) - (HALF_WINDOW_HEIGHT - (CELL_SIZE / 2.)),
-                            0.,
-                        ),
-                        ..default()
-                    },
-                    ..default()
-                });
+                .insert_bundle(cell.draw(x, y));
         }
     }
 
-    let shape: TetrominoInPlay = TetrominoInPlay {
-        tetromino: Tetromino::new(TetrominoShape::I),
-        x: 4,
-        y: 4,
-    };
+    let upcoming_x = Grid::right() as i8 + 4;
+    let mut upcoming_y = Grid::top().clone() as i8;
 
-    for mut gridcell in shape.get_cells().iter_mut() {
-        grid.0[gridcell.x as usize][gridcell.y as usize] = gridcell.cell;
+    for tetromino in tetris.clone().upcoming {
+        let shape = TetrominoInPlace {
+            tetromino,
+            x: upcoming_x,
+            y: upcoming_y,
+        };
+
+        upcoming_y -= 5;
+
+        for gridcell in shape.get_cells().iter_mut() {
+            commands
+                .spawn()
+                .insert_bundle(gridcell.cell.draw(gridcell.x as usize, gridcell.y as usize));
+        }
+    }
+
+    if let Some(held) = tetris.clone().hold {
+        let hold_x = Grid::left() as i8 - 3;
+        let hold_y = Grid::top() as i8;
+
+        let shape = TetrominoInPlace {
+            tetromino: held,
+            x: hold_x,
+            y: hold_y,
+        };
+
+        for gridcell in shape.get_cells().iter_mut() {
+            commands
+                .spawn()
+                .insert_bundle(gridcell.cell.draw(gridcell.x as usize, gridcell.y as usize));
+        }
     }
 }
 
