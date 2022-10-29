@@ -1,12 +1,11 @@
+use super::super::game::cell;
+use super::super::game::grid;
+use super::super::game::input;
 use super::camera;
 use super::config;
-use super::grid;
-use super::tetris;
+use super::icon;
 use bevy::prelude::*;
-use bevy::time::*;
-use bevy::window::WindowId;
-use bevy::winit::WinitWindows;
-use winit::window::Icon;
+use bevy::time::FixedTimestep;
 
 pub fn start() {
     App::new()
@@ -20,27 +19,20 @@ pub fn start() {
         })
         .insert_resource(ClearColor(Color::BLACK))
         .add_plugins(DefaultPlugins)
-        .add_startup_system(set_window_icon)
+        .add_startup_system(icon::setup)
         .add_startup_system(camera::setup)
         .add_startup_system(grid::setup)
-        .add_startup_system(tetris::setup)
-        .add_system(grid::draw.with_run_criteria(FixedTimestep::steps_per_second(30.)))
-        .add_system(grid::apply_gravity.with_run_criteria(FixedTimestep::steps_per_second(1.)))
+        .add_system(
+            cell::clear
+                .before(grid::draw)
+                .with_run_criteria(FixedTimestep::steps_per_second(15.)),
+        )
+        .add_system(
+            grid::refresh
+                .before(grid::draw)
+                .with_run_criteria(FixedTimestep::steps_per_second(15.)),
+        )
+        .add_system(grid::draw.with_run_criteria(FixedTimestep::steps_per_second(15.)))
+        .add_system(input::handle)
         .run();
-}
-
-fn set_window_icon(windows: NonSend<WinitWindows>) {
-    let primary = windows.get_window(WindowId::primary()).unwrap();
-
-    let (icon_rgba, icon_width, icon_height) = {
-        let image = image::open("assets/common/eyzi-logo.png")
-            .expect("Failed to open icon path")
-            .into_rgba8();
-        let (width, height) = image.dimensions();
-        let rgba = image.into_raw();
-        (rgba, width, height)
-    };
-
-    let icon = Icon::from_rgba(icon_rgba, icon_width, icon_height).unwrap();
-    primary.set_window_icon(Some(icon));
 }
