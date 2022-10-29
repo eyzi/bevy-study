@@ -2,15 +2,17 @@ use super::super::core::config;
 use super::cell::*;
 use super::tetromino::*;
 use bevy::prelude::*;
-use bevy::sprite::Anchor;
 
 #[derive(Component, Clone)]
 pub struct Grid {
     origin_x: i16,
     origin_y: i16,
+    pub static_cells: Vec<Vec<Cell>>,
     pub cells: Vec<Vec<Cell>>,
     pub held: Option<Tetromino>,
     pub falling: Option<Tetromino>,
+    pub falling_x: usize,
+    pub falling_y: usize,
     pub upcoming: Vec<Tetromino>,
 }
 
@@ -27,9 +29,12 @@ impl Grid {
         let mut grid = Grid {
             origin_x,
             origin_y,
-            cells: vec![],
+            static_cells: vec![vec![]],
+            cells: vec![vec![]],
             held: Some(Tetromino::new(TetrominoShape::I)),
-            falling: None,
+            falling: Some(Tetromino::new(TetrominoShape::Z)),
+            falling_x: Grid::falling_x_start(),
+            falling_y: Grid::falling_y_start(),
             upcoming: vec![
                 Tetromino::new(TetrominoShape::S),
                 Tetromino::new(TetrominoShape::J),
@@ -51,17 +56,18 @@ impl Grid {
             }
             column_cells.push(row_cells);
         }
-        grid.cells = column_cells;
+        grid.static_cells = column_cells;
 
         grid
     }
 
     fn bottom() -> usize {
-        ((config::WINDOW_HEIGHT / config::CELL_SIZE - 20.) / 2. - 1.) as usize
+        ((config::WINDOW_HEIGHT / config::CELL_SIZE - config::GRID_HEIGHT as f32) / 2. - 1.)
+            as usize
     }
 
     fn left() -> usize {
-        ((config::WINDOW_WIDTH / config::CELL_SIZE - 10.) / 2. - 1.) as usize
+        ((config::WINDOW_WIDTH / config::CELL_SIZE - config::GRID_WIDTH as f32) / 2. - 1.) as usize
     }
 
     fn top() -> usize {
@@ -88,6 +94,14 @@ impl Grid {
         Self::top() - 3 - (index as i16 * 4) as usize
     }
 
+    fn falling_x_start() -> usize {
+        Self::left() + (config::GRID_WIDTH / 2) as usize - 1
+    }
+
+    fn falling_y_start() -> usize {
+        Self::top()
+    }
+
     fn set_border(&self) -> fn(usize, usize) -> bool {
         |x: usize, y: usize| {
             ((y >= Self::bottom() && y <= Self::top()) && (x == Self::left() || x == Self::right()))
@@ -96,10 +110,12 @@ impl Grid {
         }
     }
 
-    fn within_border(&self) -> fn(usize, usize) -> bool {
-        |x: usize, y: usize| {
-            x > Self::left() && x < Self::right() && y > Self::bottom() && y < Self::bottom()
-        }
+    fn within_grid(&self, x: usize, y: usize) -> bool {
+        x < self.cells.len() as usize && y < self.cells[0].len()
+    }
+
+    fn within_border(&self, x: usize, y: usize) -> bool {
+        x > Self::left() && x < Self::right() && y > Self::bottom() && y < Self::top()
     }
 }
 
@@ -107,50 +123,75 @@ pub fn setup(mut commands: Commands) {
     commands.spawn().insert(Grid::new());
 }
 
-pub fn refresh(mut q: Query<&Grid>) {
-    for grid in q.iter_mut() {
-        // tetris. go through every row inside border. if not empty or not full, copy
-        // set falling cells on position
-        // set held cells
-        // set upcoming cells
+pub fn refresh(mut q: Query<&mut Grid>) {
+    // for grid in q.iter_mut() {
+    //      tetris. go through every row inside border. if not empty or not full, copy
+    //      set falling cells on position
+    //      set held cells
+    //      set upcoming cells
+    // }
+
+    let mut grid = q.iter_mut().next().unwrap();
+
+    grid.cells = grid.static_cells.clone();
+
+    if let Some(falling) = grid.falling.clone() {
+        for (falling_y, row) in falling.cells().iter().enumerate() {
+            for (falling_x, &content) in row.iter().enumerate() {
+                let x = grid.falling_x + falling_x;
+                let y = grid.falling_y + falling_y;
+                if grid.within_border(x, y) {
+                    grid.cells[x][y] = grid.cells[x][y].set(if let Some(color) = content {
+                        color
+                    } else {
+                        BLANK_COLOR
+                    });
+                }
+            }
+        }
+    }
+
+    if let Some(held) = grid.held.clone() {
+        for (held_x, row) in held.cells().iter().enumerate() {
+            for (held_y, &content) in row.iter().enumerate() {
+                let x = grid.held_x() + held_x;
+                let y = grid.held_y() + held_y;
+                if grid.within_grid(x, y) {
+                    grid.cells[x][y] = grid.cells[x][y].set(if let Some(color) = content {
+                        color
+                    } else {
+                        BLANK_COLOR
+                    });
+                }
+            }
+        }
+    }
+
+    for (index, upcoming) in grid.upcoming.clone().iter().enumerate() {
+        for (upcoming_x, row) in upcoming.cells().iter().enumerate() {
+            for (upcoming_y, &content) in row.iter().enumerate() {
+                let x = grid.upcoming_x() + upcoming_x;
+                let y = grid.upcoming_y(index) + upcoming_y;
+                if grid.within_grid(x, y) {
+                    grid.cells[x][y] = grid.cells[x][y].set(if let Some(color) = content {
+                        color
+                    } else {
+                        BLANK_COLOR
+                    });
+                }
+            }
+        }
     }
 }
 
 pub fn draw(mut commands: Commands, mut q: Query<&Grid>) {
-    for grid in q.iter_mut() {
-        let origin_x = grid.origin_x;
-        let origin_y = grid.origin_y;
+    let grid = q.iter_mut().next().unwrap();
+    let origin_x = grid.origin_x;
+    let origin_y = grid.origin_y;
 
-        for (_x, rows) in grid.cells.iter().enumerate() {
-            for (_y, cell) in rows.iter().enumerate() {
-                cell.draw(&mut commands, origin_x, origin_y);
-            }
-        }
-
-        if let Some(held) = &grid.held {
-            for (x, row) in held.cells().iter().enumerate() {
-                for (y, &content) in row.iter().enumerate() {
-                    Cell {
-                        x: grid.held_x() + x,
-                        y: grid.held_y() + y,
-                        content,
-                    }
-                    .draw(&mut commands, origin_x, origin_y);
-                }
-            }
-        }
-
-        for (index, upcoming) in grid.upcoming.iter().enumerate() {
-            for (x, row) in upcoming.cells().iter().enumerate() {
-                for (y, &content) in row.iter().enumerate() {
-                    Cell {
-                        x: grid.upcoming_x() + x,
-                        y: grid.upcoming_y(index) + y,
-                        content,
-                    }
-                    .draw(&mut commands, origin_x, origin_y);
-                }
-            }
+    for rows in grid.cells.iter() {
+        for cell in rows.iter() {
+            cell.draw(&mut commands, origin_x, origin_y);
         }
     }
 }

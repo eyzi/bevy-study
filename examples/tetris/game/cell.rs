@@ -37,31 +37,28 @@ impl Cell {
         self.content = None;
     }
 
-    pub fn draw(&self, commands: &mut Commands, origin_x: i16, origin_y: i16) {
+    pub fn draw(self, commands: &mut Commands, origin_x: i16, origin_y: i16) {
         let (x_translation, y_translation) =
             Self::to_raw_coords(self.x, self.y, origin_x, origin_y);
 
         if let Some(color) = self.content {
-            commands
-                .spawn()
-                .insert(self.clone())
-                .insert_bundle(SpriteBundle {
-                    sprite: Sprite {
-                        color,
-                        anchor: Anchor::BottomLeft,
-                        ..default()
-                    },
-                    transform: Transform {
-                        scale: Vec3::new(
-                            config::CELL_SIZE - config::CELL_MARGIN,
-                            config::CELL_SIZE - config::CELL_MARGIN,
-                            1.,
-                        ),
-                        translation: Vec3::new(x_translation as f32, y_translation as f32, 0.),
-                        ..default()
-                    },
+            commands.spawn().insert(self).insert_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color,
+                    anchor: Anchor::BottomLeft,
                     ..default()
-                });
+                },
+                transform: Transform {
+                    scale: Vec3::new(
+                        config::CELL_SIZE - config::CELL_MARGIN,
+                        config::CELL_SIZE - config::CELL_MARGIN,
+                        1.,
+                    ),
+                    translation: Vec3::new(x_translation as f32, y_translation as f32, 0.),
+                    ..default()
+                },
+                ..default()
+            });
         }
     }
 }

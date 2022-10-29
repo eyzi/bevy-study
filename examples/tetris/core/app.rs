@@ -1,4 +1,5 @@
 use super::super::game::cell;
+use super::super::game::gravity;
 use super::super::game::grid;
 use super::super::game::input;
 use super::camera;
@@ -33,6 +34,7 @@ pub fn start() {
                 .with_run_criteria(FixedTimestep::steps_per_second(15.)),
         )
         .add_system(grid::draw.with_run_criteria(FixedTimestep::steps_per_second(15.)))
+        .add_system(gravity::apply.with_run_criteria(FixedTimestep::steps_per_second(1.)))
         .add_system(input::handle)
         .run();
 }

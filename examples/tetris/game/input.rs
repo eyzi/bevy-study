@@ -11,6 +11,13 @@ pub fn handle(keyboard_input: Res<Input<KeyCode>>, mut q: Query<&mut Grid>) {
                 held.rotate_clockwise();
             }
         }
+        if let Some(falling) = &mut grid.falling {
+            if keyboard_input.just_pressed(KeyCode::A) {
+                falling.rotate_anticlockwise();
+            } else if keyboard_input.just_pressed(KeyCode::D) {
+                falling.rotate_clockwise();
+            }
+        }
         for upcoming in &mut grid.upcoming {
             if keyboard_input.just_pressed(KeyCode::A) {
                 upcoming.rotate_anticlockwise();
