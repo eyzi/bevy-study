@@ -1,4 +1,5 @@
 use super::config;
+use super::icon;
 use bevy::prelude::*;
 
 pub fn start() {
@@ -12,5 +13,6 @@ pub fn start() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
+        .add_startup_system(icon::setup)
         .run();
 }
