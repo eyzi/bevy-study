@@ -2,27 +2,30 @@ use super::grid::*;
 use bevy::prelude::*;
 
 pub fn handle(keyboard_input: Res<Input<KeyCode>>, mut q: Query<&mut Grid>) {
-    // TODO: rotating held and upcoming only for testing
-    for mut grid in q.iter_mut() {
-        if let Some(held) = &mut grid.held {
-            if keyboard_input.just_pressed(KeyCode::A) {
-                held.rotate_anticlockwise();
-            } else if keyboard_input.just_pressed(KeyCode::D) {
-                held.rotate_clockwise();
+    let mut grid = q.iter_mut().next().unwrap();
+
+    // get new x and y if can turn
+
+    if let Some(falling) = &mut grid.falling {
+        if keyboard_input.just_pressed(KeyCode::Q) {
+            falling.rotate_anticlockwise();
+        }
+        if keyboard_input.just_pressed(KeyCode::E) {
+            falling.rotate_clockwise();
+        }
+        if keyboard_input.just_pressed(KeyCode::A) {
+            if let Some(new_falling_x) = grid.falling_x.checked_sub(1) {
+                grid.falling_x = new_falling_x;
             }
         }
-        if let Some(falling) = &mut grid.falling {
-            if keyboard_input.just_pressed(KeyCode::A) {
-                falling.rotate_anticlockwise();
-            } else if keyboard_input.just_pressed(KeyCode::D) {
-                falling.rotate_clockwise();
+        if keyboard_input.just_pressed(KeyCode::D) {
+            if let Some(new_falling_x) = grid.falling_x.checked_add(1) {
+                grid.falling_x = new_falling_x;
             }
         }
-        for upcoming in &mut grid.upcoming {
-            if keyboard_input.just_pressed(KeyCode::A) {
-                upcoming.rotate_anticlockwise();
-            } else if keyboard_input.just_pressed(KeyCode::D) {
-                upcoming.rotate_clockwise();
+        if keyboard_input.just_pressed(KeyCode::S) {
+            if let Some(new_falling_y) = grid.falling_y.checked_sub(1) {
+                grid.falling_y = new_falling_y;
             }
         }
     }
