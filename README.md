@@ -12,3 +12,4 @@ cargo run --example <game>
 - [snake](https://github.com/eyzi/bevy-study/tree/main/examples/snake)
 - [minesweeper (unfinished)](https://github.com/eyzi/bevy-study/tree/main/examples/minesweeper)
 - [tetris (unfinished)](https://github.com/eyzi/bevy-study/tree/main/examples/tetris)
+- [chess (unfinished)](https://github.com/eyzi/bevy-study/tree/main/examples/chess)
