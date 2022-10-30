@@ -1,4 +1,14 @@
+#![windows_subsystem = "windows"]
+
+use bevy::prelude::{App, Camera2dBundle, Commands, DefaultPlugins};
+
 fn main() {
-    println!("a dummy's attempt at making games in rust using bevy");
-    println!("Usage: `cargo run --example <game>`");
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_startup_system(setup_camera)
+        .run();
+}
+
+fn setup_camera(mut commands: Commands) {
+    commands.spawn().insert_bundle(Camera2dBundle::default());
 }
