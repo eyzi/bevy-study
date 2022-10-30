@@ -8,6 +8,7 @@ pub struct Square {
 }
 
 impl Square {
+    #[allow(dead_code)]
     fn is_white(&self) -> bool {
         (self.x + self.y + 1) % 2 == 0
     }
