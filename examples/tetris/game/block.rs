@@ -3,7 +3,6 @@ use super::collission::*;
 use super::coords::*;
 use super::gravity::*;
 use super::screen::*;
-use super::tetromino;
 use super::tetromino::*;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
@@ -94,7 +93,6 @@ pub fn persist_tetromino(
 
 pub fn refresh(
     mut commands: Commands,
-    block_query: Query<&Block>,
     grid_query: Query<&Grid>,
     held_query: Query<&Tetromino, With<Held>>,
     upcoming_query: Query<(&Tetromino, &Upcoming, Without<Falling>, Without<Held>)>,

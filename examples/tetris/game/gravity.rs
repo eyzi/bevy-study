@@ -15,13 +15,6 @@ pub fn apply(
     grid_query: Query<&mut Grid>,
     mut collidable_query: Query<&Block, With<Collidable>>,
     mut falling_query: Query<(Entity, &mut Tetromino, &mut Falling), Without<Upcoming>>,
-    mut upcoming_query: Query<(
-        Entity,
-        &mut Tetromino,
-        &mut Upcoming,
-        Without<Falling>,
-        Without<Held>,
-    )>,
 ) {
     let grid = grid_query.single();
     if !falling_query.is_empty() {

@@ -12,13 +12,6 @@ pub fn handle(
     grid_query: Query<&mut Grid>,
     mut falling_query: Query<(Entity, &mut Tetromino, &mut Falling)>,
     mut held_query: Query<(Entity, &mut Tetromino, With<Held>, Without<Falling>)>,
-    upcoming_query: Query<(
-        Entity,
-        &mut Tetromino,
-        &mut Upcoming,
-        Without<Falling>,
-        Without<Held>,
-    )>,
 ) {
     let grid = grid_query.single();
 
