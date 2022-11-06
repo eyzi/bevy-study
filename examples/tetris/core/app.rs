@@ -1,7 +1,8 @@
-use super::super::game::cell;
+use super::super::game::block;
 use super::super::game::gravity;
-use super::super::game::grid;
 use super::super::game::input;
+use super::super::game::screen;
+use super::super::game::tetromino;
 use super::camera;
 use super::config;
 use super::icon;
@@ -22,18 +23,18 @@ pub fn start() {
         .add_plugins(DefaultPlugins)
         .add_startup_system(icon::setup)
         .add_startup_system(camera::setup)
-        .add_startup_system(grid::setup)
-        .add_system(
-            cell::clear
-                .before(grid::draw)
-                .with_run_criteria(FixedTimestep::steps_per_second(15.)),
+        .add_startup_system(screen::setup)
+        .add_startup_system(tetromino::setup)
+        .add_system_to_stage(
+            CoreStage::PreUpdate,
+            block::refresh.with_run_criteria(FixedTimestep::steps_per_second(15.)),
         )
-        .add_system(
-            grid::refresh
-                .before(grid::draw)
-                .with_run_criteria(FixedTimestep::steps_per_second(15.)),
+        .add_system_to_stage(
+            CoreStage::PreUpdate,
+            gravity::clear
+                .with_run_criteria(FixedTimestep::steps_per_second(1.))
+                .before(gravity::apply),
         )
-        .add_system(grid::draw.with_run_criteria(FixedTimestep::steps_per_second(15.)))
         .add_system(gravity::apply.with_run_criteria(FixedTimestep::steps_per_second(1.)))
         .add_system(input::handle)
         .run();

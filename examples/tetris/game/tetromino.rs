@@ -1,4 +1,16 @@
+use super::block::*;
+use super::coords::*;
+use super::screen::*;
 use bevy::prelude::*;
+use rand::{prelude::thread_rng, Rng};
+
+#[derive(Component)]
+pub struct Held;
+
+#[derive(Component)]
+pub struct Upcoming {
+    pub index: u8,
+}
 
 #[allow(dead_code)]
 #[derive(Clone, Copy)]
@@ -212,6 +224,67 @@ impl Tetromino {
                 new_cells
             }
             _ => cells,
+        }
+    }
+}
+
+pub fn setup(mut commands: Commands) {
+    for index in 0..3 {
+        create_upcoming(&mut commands, index, Tetromino::new(random_shape()))
+    }
+}
+
+pub fn create_held(commands: &mut Commands, tetromino: Tetromino) {
+    commands.spawn().insert(Held).insert(tetromino);
+}
+
+pub fn create_upcoming(commands: &mut Commands, index: u8, tetromino: Tetromino) {
+    commands
+        .spawn()
+        .insert(Upcoming { index })
+        .insert(tetromino);
+}
+
+pub fn random_shape() -> TetrominoShape {
+    let mut rng = thread_rng();
+    match rng.gen_range(0..=6i8) {
+        0 => TetrominoShape::J,
+        1 => TetrominoShape::L,
+        2 => TetrominoShape::O,
+        3 => TetrominoShape::Z,
+        4 => TetrominoShape::S,
+        5 => TetrominoShape::T,
+        _ => TetrominoShape::I,
+    }
+}
+
+pub fn clear(
+    commands: &mut Commands,
+    grid: &Grid,
+    tetromino: &Tetromino,
+    origin_x: u8,
+    origin_y: u8,
+) {
+    for (x, row) in tetromino.cells().into_iter().enumerate() {
+        for (y, _cell) in row.into_iter().enumerate() {
+            let block_x = origin_x + x as u8;
+            let block_y = origin_y + y as u8;
+
+            if within_border(block_x as i16, block_y as i16) {
+                let block = Block {
+                    coords: Coords {
+                        x: block_x,
+                        y: block_y,
+                    },
+                    color: BLANK_COLOR,
+                };
+
+                if let Some(block_entity) = grid.blocks.get(&block.coords) {
+                    commands
+                        .entity(*block_entity)
+                        .insert_bundle(block.sprite_bundle());
+                }
+            }
         }
     }
 }
