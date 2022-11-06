@@ -176,6 +176,10 @@ impl Tetromino {
         self.rotation = self.rotation.anticlockwise();
     }
 
+    pub fn set_rotation(self: &mut Self, rotation: TetrominoRotation) {
+        self.rotation = rotation;
+    }
+
     fn apply_rotation(&self) -> Vec<Vec<Option<Color>>> {
         let cells = self.shape.cells();
         match self.rotation {

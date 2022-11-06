@@ -122,13 +122,17 @@ pub fn handle(
                 falling.coords.y,
             );
             if let Some((held_entity, held_tetromino, _, _)) = held_query.iter_mut().next() {
-                commands.entity(falling_entity).despawn();
+                let mut new_held = tetromino.clone();
+                new_held.set_rotation(TetrominoRotation::Zero);
                 commands.entity(held_entity).despawn();
-                create_falling(&mut commands, held_tetromino.clone());
-                create_held(&mut commands, tetromino.clone());
-            } else {
+                create_held(&mut commands, new_held);
                 commands.entity(falling_entity).despawn();
-                create_held(&mut commands, tetromino.clone());
+                create_falling(&mut commands, held_tetromino.clone());
+            } else {
+                let mut new_held = tetromino.clone();
+                new_held.set_rotation(TetrominoRotation::Zero);
+                commands.entity(falling_entity).despawn();
+                create_held(&mut commands, new_held);
             }
         }
     }
