@@ -3,6 +3,7 @@ use super::collission::*;
 use super::coords::*;
 use super::gravity::*;
 use super::screen::*;
+use super::tetromino;
 use super::tetromino::*;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
@@ -12,6 +13,9 @@ pub struct Block {
     pub coords: Coords,
     pub color: Color,
 }
+
+#[derive(Component)]
+pub struct Clearable;
 
 impl Block {
     fn screen_coords(&self) -> (f32, f32) {
@@ -56,6 +60,38 @@ pub fn set_collidable(commands: &mut Commands, block: Entity) {
     commands.entity(block).insert(Collidable);
 }
 
+pub fn persist_tetromino(
+    commands: &mut Commands,
+    grid: &Grid,
+    tetromino: Tetromino,
+    origin_x: i8,
+    origin_y: i8,
+) {
+    for (x, row) in tetromino.cells().into_iter().enumerate() {
+        for (y, cell) in row.into_iter().enumerate() {
+            if let Some(color) = cell {
+                if y as i8 >= border_top() {
+                    // game over
+                }
+
+                let block = Block {
+                    coords: Coords {
+                        x: origin_x + x as i8,
+                        y: origin_y + y as i8,
+                    },
+                    color,
+                };
+                let block_entity = grid.blocks.get(&block.coords).unwrap();
+                commands
+                    .entity(*block_entity)
+                    .insert_bundle(block.sprite_bundle())
+                    .insert(Collidable)
+                    .insert(Clearable);
+            }
+        }
+    }
+}
+
 pub fn refresh(
     mut commands: Commands,
     block_query: Query<&Block>,
@@ -77,8 +113,8 @@ pub fn refresh(
                     color = c;
                 }
 
-                let block_x = origin_x + x as u8;
-                let block_y = origin_y + y as u8;
+                let block_x = origin_x + x as i8;
+                let block_y = origin_y + y as i8;
 
                 if within_screen(block_x as i16, block_y as i16) {
                     let block = Block {
@@ -108,8 +144,8 @@ pub fn refresh(
                     color = c;
                 }
 
-                let block_x = origin_x + x as u8;
-                let block_y = origin_y + y as u8;
+                let block_x = origin_x + x as i8;
+                let block_y = origin_y + y as i8;
 
                 if within_screen(block_x as i16, block_y as i16) {
                     let block = Block {
@@ -135,8 +171,8 @@ pub fn refresh(
         for (x, row) in tetromino.cells().into_iter().enumerate() {
             for (y, cell) in row.into_iter().enumerate() {
                 if let Some(color) = cell {
-                    let block_x = origin_x + x as u8;
-                    let block_y = origin_y + y as u8;
+                    let block_x = origin_x + x as i8;
+                    let block_y = origin_y + y as i8;
 
                     if within_border(block_x as i16, block_y as i16) {
                         let block = Block {

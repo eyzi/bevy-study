@@ -19,8 +19,8 @@ pub fn setup(mut commands: Commands) {
 
     let columns = config::WINDOW_WIDTH / config::CELL_SIZE;
     let rows = config::WINDOW_HEIGHT / config::CELL_SIZE;
-    for x in 0..columns as u8 {
-        for y in 0..rows as u8 {
+    for x in 0..columns as i8 {
+        for y in 0..rows as i8 {
             let coords = Coords { x, y };
             let is_border = is_border(coords);
             let color = if is_border { BORDER_COLOR } else { BLANK_COLOR };
@@ -42,27 +42,27 @@ pub fn is_border(coords: Coords) -> bool {
     border_vertical(coords) || border_horizontal(coords)
 }
 
-pub fn screen_top() -> u8 {
-    (config::WINDOW_HEIGHT / config::CELL_SIZE) as u8
+pub fn screen_top() -> i8 {
+    (config::WINDOW_HEIGHT / config::CELL_SIZE) as i8
 }
 
-pub fn screen_right() -> u8 {
-    (config::WINDOW_WIDTH / config::CELL_SIZE) as u8
+pub fn screen_right() -> i8 {
+    (config::WINDOW_WIDTH / config::CELL_SIZE) as i8
 }
 
-pub fn border_bottom() -> u8 {
-    ((config::WINDOW_HEIGHT / config::CELL_SIZE - config::GRID_HEIGHT as f32) / 2. - 1.) as u8
+pub fn border_bottom() -> i8 {
+    ((config::WINDOW_HEIGHT / config::CELL_SIZE - config::GRID_HEIGHT as f32) / 2. - 1.) as i8
 }
 
-pub fn border_left() -> u8 {
-    ((config::WINDOW_WIDTH / config::CELL_SIZE - config::GRID_WIDTH as f32) / 2. - 1.) as u8
+pub fn border_left() -> i8 {
+    ((config::WINDOW_WIDTH / config::CELL_SIZE - config::GRID_WIDTH as f32) / 2. - 1.) as i8
 }
 
-pub fn border_top() -> u8 {
+pub fn border_top() -> i8 {
     border_bottom() + 21
 }
 
-pub fn border_right() -> u8 {
+pub fn border_right() -> i8 {
     border_left() + 11
 }
 

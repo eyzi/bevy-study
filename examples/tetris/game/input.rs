@@ -10,11 +10,20 @@ pub fn handle(
     mut collidable_query: Query<&Block, With<Collidable>>,
     keyboard_input: Res<Input<KeyCode>>,
     grid_query: Query<&mut Grid>,
-    mut falling_query: Query<(&mut Tetromino, &mut Falling)>,
+    mut falling_query: Query<(Entity, &mut Tetromino, &mut Falling)>,
+    mut held_query: Query<(Entity, &mut Tetromino, With<Held>, Without<Falling>)>,
+    upcoming_query: Query<(
+        Entity,
+        &mut Tetromino,
+        &mut Upcoming,
+        Without<Falling>,
+        Without<Held>,
+    )>,
 ) {
     let grid = grid_query.single();
 
-    for (mut tetromino, mut falling) in falling_query.iter_mut() {
+    if !falling_query.is_empty() {
+        let (falling_entity, mut tetromino, mut falling) = falling_query.single_mut();
         if keyboard_input.just_pressed(KeyCode::Q) {
             let mut mock_tetromino = tetromino.clone();
             mock_tetromino.rotate_anticlockwise();
@@ -67,7 +76,7 @@ pub fn handle(
                     falling.coords.x,
                     falling.coords.y,
                 );
-                falling.coords.x = falling.coords.x.checked_sub(1).unwrap_or(falling.coords.x);
+                falling.coords.x -= 1;
             }
         }
         if keyboard_input.just_pressed(KeyCode::D) {
@@ -84,7 +93,7 @@ pub fn handle(
                     falling.coords.x,
                     falling.coords.y,
                 );
-                falling.coords.x = falling.coords.x.checked_add(1).unwrap_or(falling.coords.x);
+                falling.coords.x += 1;
             }
         }
         if keyboard_input.just_pressed(KeyCode::S) {
@@ -101,7 +110,25 @@ pub fn handle(
                     falling.coords.x,
                     falling.coords.y,
                 );
-                falling.coords.y = falling.coords.y.checked_sub(1).unwrap_or(falling.coords.y);
+                falling.coords.y -= 1;
+            }
+        }
+        if keyboard_input.just_pressed(KeyCode::Z) {
+            clear_falling(
+                &mut commands,
+                grid,
+                &tetromino,
+                falling.coords.x,
+                falling.coords.y,
+            );
+            if let Some((held_entity, held_tetromino, _, _)) = held_query.iter_mut().next() {
+                commands.entity(falling_entity).despawn();
+                commands.entity(held_entity).despawn();
+                create_falling(&mut commands, held_tetromino.clone());
+                create_held(&mut commands, tetromino.clone());
+            } else {
+                commands.entity(falling_entity).despawn();
+                create_held(&mut commands, tetromino.clone());
             }
         }
     }

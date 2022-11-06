@@ -10,15 +10,28 @@ pub struct Falling {
     pub coords: Coords,
 }
 
-pub fn clear(
+pub fn apply(
     mut commands: Commands,
     grid_query: Query<&mut Grid>,
-    mut falling_query: Query<(&Tetromino, &Falling)>,
+    mut collidable_query: Query<&Block, With<Collidable>>,
+    mut falling_query: Query<(Entity, &mut Tetromino, &mut Falling), Without<Upcoming>>,
+    mut upcoming_query: Query<(
+        Entity,
+        &mut Tetromino,
+        &mut Upcoming,
+        Without<Falling>,
+        Without<Held>,
+    )>,
 ) {
     let grid = grid_query.single();
-
     if !falling_query.is_empty() {
-        for (tetromino, falling) in falling_query.iter_mut() {
+        let (falling_entity, tetromino, mut falling) = falling_query.single_mut();
+        if !has_collission(
+            &tetromino,
+            &mut collidable_query,
+            falling.coords.x,
+            falling.coords.y - 1,
+        ) {
             clear_falling(
                 &mut commands,
                 grid,
@@ -26,37 +39,17 @@ pub fn clear(
                 falling.coords.x,
                 falling.coords.y,
             );
-        }
-    }
-}
-
-pub fn apply(
-    mut commands: Commands,
-    mut collidable_query: Query<&Block, With<Collidable>>,
-    mut falling_query: Query<(Entity, &mut Tetromino, &mut Falling), Without<Upcoming>>,
-    mut upcoming_query: Query<(Entity, &mut Tetromino, &mut Upcoming), Without<Falling>>,
-) {
-    if !falling_query.is_empty() {
-        let (falling_entity, tetromino, mut falling) = falling_query.single_mut();
-        if has_collission(
-            &tetromino,
-            &mut collidable_query,
-            falling.coords.x,
-            falling.coords.y - 1,
-        ) {
-            commands.entity(falling_entity).despawn();
+            falling.coords.y -= 1;
         } else {
-            falling.coords.y = falling.coords.y.checked_sub(1).unwrap_or(falling.coords.y);
-        }
-    } else {
-        for (upcoming_entity, tetromino, mut upcoming) in upcoming_query.iter_mut() {
-            if (upcoming.index == 0) {
-                create_falling(&mut commands, tetromino.clone());
-                commands.entity(upcoming_entity).despawn();
-            } else {
-                upcoming.index -= 1;
-            }
-            create_upcoming(&mut commands, 2, Tetromino::new(random_shape()));
+            // check game over
+            persist_tetromino(
+                &mut commands,
+                grid,
+                tetromino.clone(),
+                falling.coords.x,
+                falling.coords.y,
+            );
+            commands.entity(falling_entity).despawn();
         }
     }
 }

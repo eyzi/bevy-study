@@ -29,13 +29,8 @@ pub fn start() {
             CoreStage::PreUpdate,
             block::refresh.with_run_criteria(FixedTimestep::steps_per_second(15.)),
         )
-        .add_system_to_stage(
-            CoreStage::PreUpdate,
-            gravity::clear
-                .with_run_criteria(FixedTimestep::steps_per_second(1.))
-                .before(gravity::apply),
-        )
         .add_system(gravity::apply.with_run_criteria(FixedTimestep::steps_per_second(1.)))
         .add_system(input::handle)
+        .add_system(tetromino::populate_falling.after(input::handle))
         .run();
 }

@@ -1,5 +1,6 @@
 use super::block::*;
 use super::coords::*;
+use super::gravity::*;
 use super::screen::*;
 use bevy::prelude::*;
 use rand::{prelude::thread_rng, Rng};
@@ -9,7 +10,7 @@ pub struct Held;
 
 #[derive(Component)]
 pub struct Upcoming {
-    pub index: u8,
+    pub index: i8,
 }
 
 #[allow(dead_code)]
@@ -238,7 +239,7 @@ pub fn create_held(commands: &mut Commands, tetromino: Tetromino) {
     commands.spawn().insert(Held).insert(tetromino);
 }
 
-pub fn create_upcoming(commands: &mut Commands, index: u8, tetromino: Tetromino) {
+pub fn create_upcoming(commands: &mut Commands, index: i8, tetromino: Tetromino) {
     commands
         .spawn()
         .insert(Upcoming { index })
@@ -258,31 +259,70 @@ pub fn random_shape() -> TetrominoShape {
     }
 }
 
+pub fn populate_falling(
+    mut commands: Commands,
+    falling_query: Query<(Entity, &mut Tetromino, &mut Falling), Without<Upcoming>>,
+    mut upcoming_query: Query<(
+        Entity,
+        &mut Tetromino,
+        &mut Upcoming,
+        Without<Falling>,
+        Without<Held>,
+    )>,
+) {
+    if falling_query.is_empty() {
+        pop_upcoming(&mut commands, &mut upcoming_query);
+    }
+}
+
+pub fn pop_upcoming(
+    mut commands: &mut Commands,
+    upcoming_query: &mut Query<(
+        Entity,
+        &mut Tetromino,
+        &mut Upcoming,
+        Without<Falling>,
+        Without<Held>,
+    )>,
+) {
+    for (upcoming_entity, tetromino, mut upcoming, _, _) in upcoming_query.iter_mut() {
+        if upcoming.index == 0 {
+            create_falling(&mut commands, tetromino.clone());
+            commands.entity(upcoming_entity).despawn();
+        } else {
+            upcoming.index -= 1;
+        }
+    }
+    create_upcoming(&mut commands, 2, Tetromino::new(random_shape()));
+}
+
 pub fn clear(
     commands: &mut Commands,
     grid: &Grid,
     tetromino: &Tetromino,
-    origin_x: u8,
-    origin_y: u8,
+    origin_x: i8,
+    origin_y: i8,
 ) {
     for (x, row) in tetromino.cells().into_iter().enumerate() {
-        for (y, _cell) in row.into_iter().enumerate() {
-            let block_x = origin_x + x as u8;
-            let block_y = origin_y + y as u8;
+        for (y, cell) in row.into_iter().enumerate() {
+            if let Some(_color) = cell {
+                let block_x = origin_x + x as i8;
+                let block_y = origin_y + y as i8;
 
-            if within_border(block_x as i16, block_y as i16) {
-                let block = Block {
-                    coords: Coords {
-                        x: block_x,
-                        y: block_y,
-                    },
-                    color: BLANK_COLOR,
-                };
+                if within_border(block_x as i16, block_y as i16) {
+                    let block = Block {
+                        coords: Coords {
+                            x: block_x,
+                            y: block_y,
+                        },
+                        color: BLANK_COLOR,
+                    };
 
-                if let Some(block_entity) = grid.blocks.get(&block.coords) {
-                    commands
-                        .entity(*block_entity)
-                        .insert_bundle(block.sprite_bundle());
+                    if let Some(block_entity) = grid.blocks.get(&block.coords) {
+                        commands
+                            .entity(*block_entity)
+                            .insert_bundle(block.sprite_bundle());
+                    }
                 }
             }
         }
