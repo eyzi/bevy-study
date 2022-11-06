@@ -8,16 +8,12 @@ use super::tetromino::*;
 #[derive(Component)]
 pub struct Collidable;
 
-pub fn has_collission(
+pub fn has_collision(
     tetromino: &Tetromino,
     collidable_query: &mut Query<&Block, With<Collidable>>,
     origin_x: i8,
     origin_y: i8,
 ) -> bool {
-    if origin_y <= 0 {
-        return true;
-    }
-
     for block in collidable_query.iter_mut() {
         for (x, row) in tetromino.cells().into_iter().enumerate() {
             for (y, cell) in row.into_iter().enumerate() {

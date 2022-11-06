@@ -27,7 +27,7 @@ pub fn handle(
         if keyboard_input.just_pressed(KeyCode::Q) {
             let mut mock_tetromino = tetromino.clone();
             mock_tetromino.rotate_anticlockwise();
-            if !has_collission(
+            if !has_collision(
                 &mock_tetromino,
                 &mut collidable_query,
                 falling.coords.x,
@@ -46,7 +46,7 @@ pub fn handle(
         if keyboard_input.just_pressed(KeyCode::E) {
             let mut mock_tetromino = tetromino.clone();
             mock_tetromino.rotate_clockwise();
-            if !has_collission(
+            if !has_collision(
                 &mock_tetromino,
                 &mut collidable_query,
                 falling.coords.x,
@@ -63,7 +63,7 @@ pub fn handle(
             }
         }
         if keyboard_input.just_pressed(KeyCode::A) {
-            if !has_collission(
+            if !has_collision(
                 &tetromino,
                 &mut collidable_query,
                 falling.coords.x - 1,
@@ -80,7 +80,7 @@ pub fn handle(
             }
         }
         if keyboard_input.just_pressed(KeyCode::D) {
-            if !has_collission(
+            if !has_collision(
                 &tetromino,
                 &mut collidable_query,
                 falling.coords.x + 1,
@@ -97,7 +97,7 @@ pub fn handle(
             }
         }
         if keyboard_input.just_pressed(KeyCode::S) {
-            if !has_collission(
+            if !has_collision(
                 &tetromino,
                 &mut collidable_query,
                 falling.coords.x,

@@ -1,4 +1,4 @@
-# Tetris (unfinished)
+# Tetris
 
 Tetris game implementation
 
@@ -16,9 +16,9 @@ cargo run --example tetris
 - Tetromino shape and rotation system
 - Better project structure
 - Usage of window icon
+- Block stacking
 
 ## Flaws
 - Memory usage seems to grow by about 8Kb per second. I suspect this is
-  due to the use of Vectors but I have not confirmed yet
-- No collission system yet
-- No popping of next tetromino yet
+  due to the use of Vectors but I have not confirmed yet (seems like
+  this is a memory leak with Camera2dBundle)

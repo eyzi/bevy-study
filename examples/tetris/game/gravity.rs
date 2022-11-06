@@ -26,7 +26,7 @@ pub fn apply(
     let grid = grid_query.single();
     if !falling_query.is_empty() {
         let (falling_entity, tetromino, mut falling) = falling_query.single_mut();
-        if !has_collission(
+        if !has_collision(
             &tetromino,
             &mut collidable_query,
             falling.coords.x,
