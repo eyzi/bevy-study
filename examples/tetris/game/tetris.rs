@@ -3,7 +3,11 @@ use super::screen::*;
 use bevy::prelude::*;
 use bevy::utils::hashbrown::HashMap;
 
-pub fn check_tetris(mut block_query: Query<&mut Block, With<Clearable>>) {
+pub fn check_tetris(
+    mut grid_query: Query<&Grid>,
+    mut block_query: Query<&mut Block, With<Clearable>>,
+) {
+    let grid = grid_query.single_mut();
     let mut tetromino_rows: HashMap<i8, i8> = HashMap::new();
 
     for block in block_query.iter_mut() {
@@ -25,21 +29,17 @@ pub fn check_tetris(mut block_query: Query<&mut Block, With<Clearable>>) {
 
     let mut tetris_rows: Vec<i8> = vec![];
     for (&key, &value) in tetromino_rows.iter() {
-        println!("row {} has {}", key, value);
         if value >= 10 {
             tetris_rows.push(key);
         }
     }
 
     if tetris_rows.len() > 0 {
-        remove_tetris_rows(&mut block_query, tetris_rows);
+        remove_tetris_rows(&grid, tetris_rows);
     }
 }
 
-pub fn remove_tetris_rows(block_query: &mut Query<&mut Block, With<Clearable>>, rows: Vec<i8>) {
-    for mut block in block_query.iter_mut() {
-        if rows.contains(&block.coords.y) {
-            block.color = BLANK_COLOR;
-        }
-    }
+pub fn remove_tetris_rows(grid: &Grid, rows: Vec<i8>) {
+    println!("{:?}", rows);
+    // copy rows from grid excluding rows
 }

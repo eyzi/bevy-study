@@ -325,6 +325,7 @@ pub fn clear(
                     if let Some(block_entity) = grid.blocks.get(&block.coords) {
                         commands
                             .entity(*block_entity)
+                            .remove_bundle::<SpriteBundle>()
                             .insert_bundle(block.sprite_bundle());
                     }
                 }
