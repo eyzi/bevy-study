@@ -2,6 +2,7 @@ use super::super::game::block;
 use super::super::game::gravity;
 use super::super::game::input;
 use super::super::game::screen;
+use super::super::game::tetris;
 use super::super::game::tetromino;
 use super::camera;
 use super::config;
@@ -32,5 +33,6 @@ pub fn start() {
         .add_system(gravity::apply.with_run_criteria(FixedTimestep::steps_per_second(1.)))
         .add_system(input::handle)
         .add_system(tetromino::populate_falling.after(input::handle))
+        .add_system(tetris::check_tetris.after(tetromino::populate_falling))
         .run();
 }

@@ -4,4 +4,5 @@ pub mod coords;
 pub mod gravity;
 pub mod input;
 pub mod screen;
+pub mod tetris;
 pub mod tetromino;

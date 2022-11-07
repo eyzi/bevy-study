@@ -83,6 +83,7 @@ pub fn persist_tetromino(
                 let block_entity = grid.blocks.get(&block.coords).unwrap();
                 commands
                     .entity(*block_entity)
+                    .remove_bundle::<SpriteBundle>()
                     .insert_bundle(block.sprite_bundle())
                     .insert(Collidable)
                     .insert(Clearable);
