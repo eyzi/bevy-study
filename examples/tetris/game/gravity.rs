@@ -2,6 +2,7 @@ use super::block::*;
 use super::collission::*;
 use super::coords::*;
 use super::screen::*;
+use super::tetris::*;
 use super::tetromino::{clear as clear_falling, *};
 use bevy::prelude::*;
 
@@ -12,6 +13,7 @@ pub struct Falling {
 
 pub fn apply(
     mut commands: Commands,
+    mut app_state: ResMut<State<AppState>>,
     grid_query: Query<&mut Grid>,
     mut collidable_query: Query<&Block, With<Collidable>>,
     mut falling_query: Query<(Entity, &mut Tetromino, &mut Falling), Without<Upcoming>>,
@@ -34,8 +36,8 @@ pub fn apply(
             );
             falling.coords.y -= 1;
         } else {
-            // check game over
             persist_tetromino(
+                &mut app_state,
                 &mut commands,
                 grid,
                 tetromino.clone(),

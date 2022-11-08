@@ -22,6 +22,7 @@ pub fn start() {
         })
         .insert_resource(ClearColor(Color::BLACK))
         .add_plugins(DefaultPlugins)
+        .add_state(tetris::AppState::GameOver)
         .add_startup_system(icon::setup)
         .add_startup_system(camera::setup)
         .add_startup_system(screen::setup)
@@ -34,5 +35,6 @@ pub fn start() {
         .add_system(input::handle)
         .add_system(tetromino::populate_falling.after(input::handle))
         .add_system(tetris::check_tetris.after(tetromino::populate_falling))
+        // .add_system(screen::check_reset.after(tetris::check_tetris))
         .run();
 }

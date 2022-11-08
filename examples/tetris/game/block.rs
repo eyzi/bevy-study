@@ -3,6 +3,7 @@ use super::collission::*;
 use super::coords::*;
 use super::gravity::*;
 use super::screen::*;
+use super::tetris::*;
 use super::tetromino::*;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
@@ -60,6 +61,7 @@ pub fn set_collidable(commands: &mut Commands, block: Entity) {
 }
 
 pub fn persist_tetromino(
+    app_state: &mut ResMut<State<AppState>>,
     commands: &mut Commands,
     grid: &Grid,
     tetromino: Tetromino,
@@ -69,8 +71,9 @@ pub fn persist_tetromino(
     for (x, row) in tetromino.cells().into_iter().enumerate() {
         for (y, cell) in row.into_iter().enumerate() {
             if let Some(color) = cell {
-                if y as i8 >= border_top() {
-                    // game over
+                if origin_y + y as i8 >= border_top() {
+                    app_state.set(AppState::GameOver).unwrap();
+                    return;
                 }
 
                 let block = Block {
