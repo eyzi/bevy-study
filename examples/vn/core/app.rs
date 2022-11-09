@@ -1,3 +1,4 @@
+use super::super::menu::plugin;
 use super::camera;
 use super::config;
 use super::icon;
@@ -15,7 +16,8 @@ pub fn start() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
-        .add_state(state::GameState::Playing)
+        .add_plugin(plugin::MainMenuPlugin)
+        .add_state(state::GameState::MainMenu)
         .add_startup_system(icon::setup)
         .add_startup_system(camera::setup)
         .run();
