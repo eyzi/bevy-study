@@ -38,6 +38,8 @@ fn add_main_menu(mut commands: Commands, asset_server: ResMut<AssetServer>) {
                 align_self: AlignSelf::Center,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                display: Display::Flex,
+                flex_direction: FlexDirection::ColumnReverse,
                 ..default()
             },
             color: UiColor::from(Color::BLACK),
@@ -49,14 +51,10 @@ fn add_main_menu(mut commands: Commands, asset_server: ResMut<AssetServer>) {
                 .insert(MenuItem::Play)
                 .insert_bundle(ButtonBundle {
                     style: Style {
-                        align_self: AlignSelf::Center,
-                        position: UiRect {
-                            top: Val::Percent(-10.),
-                            ..default()
-                        },
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
                         size: Size::new(Val::Px(500.), Val::Px(100.)),
+                        margin: UiRect::all(Val::Px(20.)),
                         ..default()
                     },
                     color: UiColor::from(Color::ALICE_BLUE),
@@ -81,14 +79,10 @@ fn add_main_menu(mut commands: Commands, asset_server: ResMut<AssetServer>) {
                 .insert(MenuItem::Exit)
                 .insert_bundle(ButtonBundle {
                     style: Style {
-                        align_self: AlignSelf::Center,
-                        position: UiRect {
-                            top: Val::Percent(10.),
-                            ..default()
-                        },
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
                         size: Size::new(Val::Px(500.), Val::Px(100.)),
+                        margin: UiRect::all(Val::Px(20.)),
                         ..default()
                     },
                     color: UiColor::from(Color::ALICE_BLUE),
