@@ -9,4 +9,6 @@ cargo run --example vn
 
 ## Features
 
+- Menu Screen
+
 ## Flaws

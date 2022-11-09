@@ -14,3 +14,5 @@ cargo run --example <game>
 - [tetris](https://github.com/eyzi/bevy-study/tree/main/examples/tetris)
 - [chess (unfinished)](https://github.com/eyzi/bevy-study/tree/main/examples/chess)
 - [vn (unfinished)](https://github.com/eyzi/bevy-study/tree/main/examples/vn)
+- [rpg (unfinished)](https://github.com/eyzi/bevy-study/tree/main/examples/rpg)
+
