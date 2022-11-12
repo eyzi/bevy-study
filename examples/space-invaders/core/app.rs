@@ -33,15 +33,17 @@ const ENEMY_LATERAL_SPEED: f32 = 100.0;
 pub fn start() {
     App::new()
         .insert_resource(ClearColor(Color::MIDNIGHT_BLUE))
-        .insert_resource(WindowDescriptor {
-            width: WIDTH,
-            height: HEIGHT,
-            title: "Space Invade.rs".to_string(),
-            resizable: false,
-            present_mode: bevy::window::PresentMode::AutoVsync,
-            ..Default::default()
-        })
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                width: WIDTH,
+                height: HEIGHT,
+                title: "Space Invade.rs".to_string(),
+                resizable: false,
+                present_mode: bevy::window::PresentMode::AutoVsync,
+                ..Default::default()
+            },
+            ..default()
+        }))
         .add_startup_system(setup)
         .add_system(player)
         .add_system(enemy_movement)
@@ -56,13 +58,13 @@ fn setup(
     mut textures: ResMut<Assets<TextureAtlas>>,
 ) {
     let texture_handle = assets.load("space-invaders/spritesheet.png");
-    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(24.0, 24.0), 3, 1);
+    let texture_atlas =
+        TextureAtlas::from_grid(texture_handle, Vec2::new(24.0, 24.0), 3, 1, None, None);
     let texture_atlas_handle = textures.add(texture_atlas);
 
     commands.spawn_bundle(Camera2dBundle::default());
     commands
-        .spawn()
-        .insert(Player { delta_x: 0.0 })
+        .spawn(Player { delta_x: 0.0 })
         .insert_bundle(SpriteSheetBundle {
             sprite: TextureAtlasSprite::new(0),
             texture_atlas: texture_atlas_handle.clone(),
@@ -85,8 +87,7 @@ fn setup(
             };
 
             commands
-                .spawn()
-                .insert(Enemy { movement })
+                .spawn(Enemy { movement })
                 .insert_bundle(SpriteSheetBundle {
                     sprite: TextureAtlasSprite::new(1),
                     texture_atlas: texture_atlas_handle.clone(),
@@ -125,19 +126,16 @@ fn player(
             .clamp(-MAX_X_MOVEMENT, MAX_X_MOVEMENT);
 
         if firing {
-            commands
-                .spawn()
-                .insert(Laser)
-                .insert_bundle(SpriteSheetBundle {
-                    texture_atlas: atlas_handle.clone(),
-                    transform: Transform::from_translation(Vec3::new(
-                        transform.translation.x,
-                        transform.translation.y,
-                        0.0,
-                    )),
-                    sprite: TextureAtlasSprite::new(2),
-                    ..Default::default()
-                });
+            commands.spawn(Laser).insert_bundle(SpriteSheetBundle {
+                texture_atlas: atlas_handle.clone(),
+                transform: Transform::from_translation(Vec3::new(
+                    transform.translation.x,
+                    transform.translation.y,
+                    0.0,
+                )),
+                sprite: TextureAtlasSprite::new(2),
+                ..Default::default()
+            });
         }
 
         player.delta_x *= 0.75;

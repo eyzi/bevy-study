@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 pub fn setup(mut commands: Commands) {
-    commands.spawn().insert_bundle(PointLightBundle {
+    commands.spawn(PointLightBundle {
         point_light: PointLight {
             intensity: 3000.,
             radius: 50.,

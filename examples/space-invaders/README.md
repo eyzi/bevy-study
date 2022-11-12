@@ -1,4 +1,4 @@
-# Space Invade.rs
+# Space Invade.rs (bevy 0.9)
 
 Space Invaders game implementation using guide by
 [TheBracket](https://rustrepo.com/repo/thebracket-bevy-test)

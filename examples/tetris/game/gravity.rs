@@ -55,8 +55,5 @@ pub fn create_falling(commands: &mut Commands, tetromino: Tetromino) {
         y: border_top(),
     };
 
-    commands
-        .spawn()
-        .insert(Falling { coords })
-        .insert(tetromino);
+    commands.spawn(Falling { coords }).insert(tetromino);
 }

@@ -38,7 +38,7 @@ pub fn setup(mut commands: Commands) {
         }
     }
 
-    commands.spawn().insert(block_dictionary);
+    commands.spawn(block_dictionary);
 }
 
 pub fn check_reset(

@@ -1,5 +1,5 @@
-use crate::core::fader;
 use crate::core::state;
+use crate::fader::plugin::create as create_fader;
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
@@ -24,39 +24,41 @@ fn create_menu(mut commands: Commands, asset_server: ResMut<AssetServer>) {
     let font: Handle<Font> = asset_server.load("common/font.ttf");
 
     commands
-        .spawn()
-        .insert(MainMenuScreen)
-        .insert_bundle(NodeBundle {
-            style: Style {
-                size: Size::new(Val::Percent(100.), Val::Percent(100.)),
-                align_self: AlignSelf::Center,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                display: Display::Flex,
-                flex_direction: FlexDirection::ColumnReverse,
+        .spawn((
+            MainMenuScreen,
+            NodeBundle {
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    align_self: AlignSelf::Center,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                },
+                background_color: BackgroundColor(Color::BLACK),
                 ..default()
             },
-            color: UiColor::from(Color::BLACK),
-            transform: Transform::from_xyz(0., 0., 89.),
-            ..default()
-        })
+        ))
         .with_children(|parent| {
             parent
-                .spawn()
-                .insert(MenuItem::Play)
-                .insert_bundle(ButtonBundle {
-                    style: Style {
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        size: Size::new(Val::Px(500.), Val::Px(100.)),
-                        margin: UiRect::all(Val::Px(20.)),
+                .spawn((
+                    MenuItem::Play,
+                    ButtonBundle {
+                        style: Style {
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            size: Size::new(Val::Px(500.), Val::Px(100.)),
+                            margin: UiRect::all(Val::Px(20.)),
+                            ..default()
+                        },
+                        background_color: BackgroundColor(Color::ALICE_BLUE),
                         ..default()
                     },
-                    color: UiColor::from(Color::ALICE_BLUE),
-                    ..default()
-                })
+                ))
                 .with_children(|button_parent| {
-                    button_parent.spawn().insert_bundle(TextBundle {
+                    button_parent.spawn(TextBundle {
                         text: Text::from_section(
                             "Play",
                             TextStyle {
@@ -70,21 +72,22 @@ fn create_menu(mut commands: Commands, asset_server: ResMut<AssetServer>) {
                 });
 
             parent
-                .spawn()
-                .insert(MenuItem::Exit)
-                .insert_bundle(ButtonBundle {
-                    style: Style {
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        size: Size::new(Val::Px(500.), Val::Px(100.)),
-                        margin: UiRect::all(Val::Px(20.)),
+                .spawn((
+                    MenuItem::Exit,
+                    ButtonBundle {
+                        style: Style {
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            size: Size::new(Val::Px(500.), Val::Px(100.)),
+                            margin: UiRect::all(Val::Px(20.)),
+                            ..default()
+                        },
+                        background_color: BackgroundColor(Color::ALICE_BLUE),
                         ..default()
                     },
-                    color: UiColor::from(Color::ALICE_BLUE),
-                    ..default()
-                })
+                ))
                 .with_children(|button_parent| {
-                    button_parent.spawn().insert_bundle(TextBundle {
+                    button_parent.spawn(TextBundle {
                         text: Text::from_section(
                             "Exit",
                             TextStyle {
@@ -101,23 +104,26 @@ fn create_menu(mut commands: Commands, asset_server: ResMut<AssetServer>) {
 
 fn handle_button(
     mut commands: Commands,
-    mut interaction_query: Query<(&Interaction, &MenuItem, &mut UiColor), Changed<Interaction>>,
+    mut interaction_query: Query<
+        (&Interaction, &MenuItem, &mut BackgroundColor),
+        Changed<Interaction>,
+    >,
     mut exit: EventWriter<AppExit>,
 ) {
     for (interaction, menu_item, mut color) in interaction_query.iter_mut() {
         match interaction {
             Interaction::Hovered => {
-                *color = UiColor::from(Color::rgb(0.9, 0.9, 0.9));
+                *color = BackgroundColor(Color::rgb(0.9, 0.9, 0.9));
             }
             Interaction::None => {
-                *color = UiColor::from(Color::WHITE);
+                *color = BackgroundColor(Color::WHITE);
             }
             Interaction::Clicked => match menu_item {
                 MenuItem::Play => {
-                    fader::create(
+                    create_fader(
                         &mut commands,
                         1.,
-                        Color::BLUE,
+                        Color::BLACK,
                         state::GameState::OptionsMenu,
                     );
                 }

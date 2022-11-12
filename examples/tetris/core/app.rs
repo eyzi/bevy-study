@@ -12,16 +12,18 @@ use bevy::time::FixedTimestep;
 
 pub fn start() {
     App::new()
-        .insert_resource(WindowDescriptor {
-            width: config::WINDOW_WIDTH,
-            height: config::WINDOW_HEIGHT,
-            title: config::GAME_NAME.to_string(),
-            resizable: false,
-            present_mode: bevy::window::PresentMode::AutoVsync,
-            ..default()
-        })
         .insert_resource(ClearColor(Color::BLACK))
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                width: config::WINDOW_WIDTH,
+                height: config::WINDOW_HEIGHT,
+                title: config::GAME_NAME.to_string(),
+                resizable: false,
+                present_mode: bevy::window::PresentMode::AutoVsync,
+                ..default()
+            },
+            ..default()
+        }))
         .add_state(tetris::AppState::GameOver)
         .add_startup_system(icon::setup)
         .add_startup_system(camera::setup)

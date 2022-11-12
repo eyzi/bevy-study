@@ -16,10 +16,10 @@ pub struct SnakeSegment {
     pub position: cell::Position,
 }
 
-#[derive(Default, Deref, DerefMut)]
+#[derive(Resource, Default, Deref, DerefMut)]
 pub struct SnakeSegments(Vec<Entity>);
 
-#[derive(Default)]
+#[derive(Resource, Default)]
 pub struct LastSnakeSegment(SnakeSegment);
 
 #[derive(Component)]
@@ -42,11 +42,9 @@ pub fn spawn_segment(mut commands: Commands, position: cell::Position, is_head: 
         Vec3::new(cell::SIZE - 5., cell::SIZE - 5., cell::SIZE - 5.)
     };
 
-    let mut segment = commands.spawn();
-
-    segment
-        .insert(SnakeSegment { position })
-        .insert_bundle(SpriteBundle {
+    let mut segment = commands.spawn((
+        SnakeSegment { position },
+        SpriteBundle {
             sprite: Sprite { color, ..default() },
             transform: Transform {
                 scale: size,
@@ -54,7 +52,8 @@ pub fn spawn_segment(mut commands: Commands, position: cell::Position, is_head: 
                 ..default()
             },
             ..default()
-        });
+        },
+    ));
 
     if is_head {
         segment.insert(Snake {

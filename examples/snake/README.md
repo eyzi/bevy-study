@@ -1,4 +1,4 @@
-# Snake
+# Snake (bevy 0.9)
 
 Snake game implementation using guide by
 [mbuffet](https://mbuffett.com/posts/bevy-snake-tutorial/)

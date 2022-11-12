@@ -19,7 +19,6 @@ impl<T> MinesweeperBoard<T> {
     pub fn create_board(
         mut commands: Commands,
         board_options: Option<Res<BoardOptions>>,
-        window: Res<WindowDescriptor>,
         asset_server: Res<AssetServer>,
     ) {
         let font: Handle<Font> = asset_server.load("minesweeper/font.ttf");
@@ -36,7 +35,7 @@ impl<T> MinesweeperBoard<T> {
         let tile_size = match options.tile_size {
             TileSize::Fixed(v) => v,
             TileSize::Adaptive { min, max } => {
-                Self::adaptive_tile_size(window, (min, max), (tile_map.width, tile_map.height))
+                Self::adaptive_tile_size((min, max), (tile_map.width, tile_map.height))
             }
         };
 
@@ -53,14 +52,12 @@ impl<T> MinesweeperBoard<T> {
         };
 
         commands
-            .spawn()
-            .insert(Name::new("Board"))
+            .spawn(Name::new("Board"))
             .insert(Transform::from_translation(board_position))
             .insert(GlobalTransform::default())
             .with_children(|parent| {
                 parent
-                    .spawn()
-                    .insert_bundle(SpriteBundle {
+                    .spawn(SpriteBundle {
                         sprite: Sprite {
                             color: Color::WHITE,
                             custom_size: Some(board_size),
@@ -83,14 +80,11 @@ impl<T> MinesweeperBoard<T> {
             });
     }
 
-    fn adaptive_tile_size(
-        window: Res<WindowDescriptor>,
-        (min, max): (f32, f32),
-        (width, height): (u16, u16),
-    ) -> f32 {
-        let max_width = window.width / width as f32;
-        let max_height = window.height / height as f32;
-        max_width.min(max_height).clamp(min, max)
+    fn adaptive_tile_size((min, max): (f32, f32), (width, height): (u16, u16)) -> f32 {
+        // let max_width = window.width / width as f32;
+        // let max_height = window.height / height as f32;
+        // max_width.min(max_height).clamp(min, max)
+        1.
     }
 
     fn bomb_count_text_bundle(count: u8, font: Handle<Font>, size: f32) -> Text2dBundle {
@@ -136,14 +130,12 @@ impl<T> MinesweeperBoard<T> {
     ) {
         for (y, line) in tile_map.iter().enumerate() {
             for (x, tile) in line.iter().enumerate() {
-                let mut commands = parent.spawn();
                 let coords = Coordinates {
                     x: x as u16,
                     y: y as u16,
                 };
-
-                commands
-                    .insert_bundle(SpriteBundle {
+                let mut commands = parent.spawn((
+                    SpriteBundle {
                         sprite: Sprite {
                             color,
                             custom_size: Some(Vec2::splat(size - padding)),
@@ -155,9 +147,10 @@ impl<T> MinesweeperBoard<T> {
                             1.,
                         ),
                         ..default()
-                    })
-                    .insert(Name::new(format!("Tile ({}, {})", x, y)))
-                    .insert(coords);
+                    },
+                    Name::new(format!("Tile ({}, {})", x, y)),
+                    coords,
+                ));
 
                 match tile {
                     Tile::Bomb => {
@@ -177,7 +170,7 @@ impl<T> MinesweeperBoard<T> {
                         commands
                             .insert(BombNeighbor { count: *v })
                             .with_children(|parent| {
-                                parent.spawn_bundle(Self::bomb_count_text_bundle(
+                                parent.spawn(Self::bomb_count_text_bundle(
                                     *v,
                                     font.clone(),
                                     size - padding,

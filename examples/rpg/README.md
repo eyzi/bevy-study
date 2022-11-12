@@ -1,4 +1,4 @@
-# RPG
+# RPG (bevy 0.9)
 
 Generic RPG implementation
 

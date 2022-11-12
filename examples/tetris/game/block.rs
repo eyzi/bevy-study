@@ -49,11 +49,7 @@ impl Block {
 
 pub fn create(commands: &mut Commands, coords: Coords, color: Color) -> Entity {
     let block = Block { coords, color };
-    commands
-        .spawn()
-        .insert(block.clone())
-        .insert_bundle(block.sprite_bundle())
-        .id()
+    commands.spawn((block.clone(), block.sprite_bundle())).id()
 }
 
 pub fn set_collidable(commands: &mut Commands, block: Entity) {

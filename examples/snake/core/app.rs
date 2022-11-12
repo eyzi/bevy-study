@@ -16,15 +16,17 @@ pub struct GameOverEvent;
 pub fn start() {
     App::new()
         .insert_resource(ClearColor(Color::MIDNIGHT_BLUE))
-        .insert_resource(WindowDescriptor {
-            width: WIDTH,
-            height: HEIGHT,
-            title: "Snake".to_string(),
-            resizable: false,
-            present_mode: bevy::window::PresentMode::AutoVsync,
-            ..Default::default()
-        })
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                width: WIDTH,
+                height: HEIGHT,
+                title: "Snake".to_string(),
+                resizable: false,
+                present_mode: bevy::window::PresentMode::AutoVsync,
+                ..Default::default()
+            },
+            ..default()
+        }))
         .add_startup_system(camera::setup)
         .add_startup_system(snake::spawn)
         .insert_resource(snake::SnakeSegments::default())

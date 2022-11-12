@@ -3,7 +3,7 @@ use super::snake;
 use bevy::prelude::*;
 use rand::prelude::random;
 
-#[derive(Default)]
+#[derive(Resource, Default)]
 pub struct FoodInfo {
     pub count: i32,
 }
@@ -25,12 +25,11 @@ pub fn spawn(mut commands: Commands, mut info: ResMut<FoodInfo>) {
         y: ((random::<f32>() * 31.) - 15.) as i32,
     };
 
-    commands
-        .spawn()
-        .insert(Food {
+    commands.spawn((
+        Food {
             position: random_position,
-        })
-        .insert_bundle(SpriteBundle {
+        },
+        SpriteBundle {
             sprite: Sprite {
                 color: COLOR,
                 ..default()
@@ -41,7 +40,8 @@ pub fn spawn(mut commands: Commands, mut info: ResMut<FoodInfo>) {
                 ..default()
             },
             ..default()
-        });
+        },
+    ));
 
     info.count += 1;
 }

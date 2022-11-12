@@ -240,14 +240,11 @@ pub fn setup(mut commands: Commands) {
 }
 
 pub fn create_held(commands: &mut Commands, tetromino: Tetromino) {
-    commands.spawn().insert(Held).insert(tetromino);
+    commands.spawn(Held).insert(tetromino);
 }
 
 pub fn create_upcoming(commands: &mut Commands, index: i8, tetromino: Tetromino) {
-    commands
-        .spawn()
-        .insert(Upcoming { index })
-        .insert(tetromino);
+    commands.spawn(Upcoming { index }).insert(tetromino);
 }
 
 pub fn random_shape() -> TetrominoShape {

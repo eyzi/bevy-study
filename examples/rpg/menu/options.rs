@@ -1,5 +1,5 @@
-use crate::core::fader;
 use crate::core::state;
+use crate::fader::plugin::create as create_fader;
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -20,38 +20,40 @@ fn create_menu(mut commands: Commands, asset_server: ResMut<AssetServer>) {
     let font: Handle<Font> = asset_server.load("common/font.ttf");
 
     commands
-        .spawn()
-        .insert(OptionsMenuScreen)
-        .insert_bundle(NodeBundle {
-            style: Style {
-                size: Size::new(Val::Percent(100.), Val::Percent(100.)),
-                align_self: AlignSelf::Center,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                display: Display::Flex,
-                flex_direction: FlexDirection::ColumnReverse,
+        .spawn((
+            OptionsMenuScreen,
+            NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                    align_self: AlignSelf::Center,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                },
+                background_color: BackgroundColor(Color::BLACK),
                 ..default()
             },
-            color: UiColor::from(Color::BLACK),
-            ..default()
-        })
+        ))
         .with_children(|parent| {
             parent
-                .spawn()
-                .insert(OptionsItem)
-                .insert_bundle(ButtonBundle {
-                    style: Style {
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        size: Size::new(Val::Px(500.), Val::Px(100.)),
-                        margin: UiRect::all(Val::Px(20.)),
+                .spawn((
+                    OptionsItem,
+                    ButtonBundle {
+                        style: Style {
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            size: Size::new(Val::Px(500.), Val::Px(100.)),
+                            margin: UiRect::all(Val::Px(20.)),
+                            ..default()
+                        },
+                        background_color: BackgroundColor(Color::ALICE_BLUE),
                         ..default()
                     },
-                    color: UiColor::from(Color::ALICE_BLUE),
-                    ..default()
-                })
+                ))
                 .with_children(|button_parent| {
-                    button_parent.spawn().insert_bundle(TextBundle {
+                    button_parent.spawn(TextBundle {
                         text: Text::from_section(
                             "Main",
                             TextStyle {
@@ -68,18 +70,21 @@ fn create_menu(mut commands: Commands, asset_server: ResMut<AssetServer>) {
 
 fn handle_button(
     mut commands: Commands,
-    mut interaction_query: Query<(&Interaction, &OptionsItem, &mut UiColor), Changed<Interaction>>,
+    mut interaction_query: Query<
+        (&Interaction, &OptionsItem, &mut BackgroundColor),
+        Changed<Interaction>,
+    >,
 ) {
     for (interaction, _, mut color) in interaction_query.iter_mut() {
         match interaction {
             Interaction::Hovered => {
-                *color = UiColor::from(Color::rgb(0.9, 0.9, 0.9));
+                *color = BackgroundColor(Color::rgb(0.9, 0.9, 0.9));
             }
             Interaction::None => {
-                *color = UiColor::from(Color::WHITE);
+                *color = BackgroundColor(Color::WHITE);
             }
             Interaction::Clicked => {
-                fader::create(&mut commands, 1., Color::BLUE, state::GameState::MainMenu);
+                create_fader(&mut commands, 1., Color::BLACK, state::GameState::MainMenu);
             }
         }
     }

@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_mod_picking::*;
 
 #[derive(Component)]
 pub struct Square {
@@ -26,8 +25,7 @@ pub fn spawn(
     for i in 0..8 {
         for j in 0..8 {
             commands
-                .spawn()
-                .insert_bundle(PbrBundle {
+                .spawn(PbrBundle {
                     mesh: mesh.clone(),
                     // Change material according to position to get alternating pattern
                     material: if (i + j + 1) % 2 == 0 {
@@ -38,7 +36,7 @@ pub fn spawn(
                     transform: Transform::from_translation(Vec3::new(i as f32, 0., j as f32)),
                     ..default()
                 })
-                .insert_bundle(PickableBundle::default())
+                // .insert_bundle(PickableBundle::default())
                 .insert(Square { x: i, y: j });
         }
     }

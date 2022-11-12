@@ -11,15 +11,17 @@ pub enum AppState {
 
 pub fn start() {
     App::new()
-        .insert_resource(WindowDescriptor {
-            width: config::WINDOW_WIDTH,
-            height: config::WINDOW_HEIGHT,
-            title: config::GAME_NAME.to_string(),
-            resizable: false,
-            present_mode: bevy::window::PresentMode::AutoVsync,
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                width: config::WINDOW_WIDTH,
+                height: config::WINDOW_HEIGHT,
+                title: config::GAME_NAME.to_string(),
+                resizable: false,
+                present_mode: bevy::window::PresentMode::AutoVsync,
+                ..default()
+            },
             ..default()
-        })
-        .add_plugins(DefaultPlugins)
+        }))
         .insert_resource(BoardOptions {
             map_size: (20, 20),
             bomb_count: 40,
@@ -35,5 +37,5 @@ pub fn start() {
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn().insert_bundle(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle::default());
 }

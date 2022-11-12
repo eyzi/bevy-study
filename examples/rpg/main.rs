@@ -1,8 +1,9 @@
 // #![windows_subsystem = "windows"]
 
 mod core;
+mod fader;
 mod menu;
-mod startup;
+mod splashscreen;
 
 fn main() {
     core::app::start();
