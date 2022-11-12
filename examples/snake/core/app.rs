@@ -20,7 +20,7 @@ pub fn start() {
             window: WindowDescriptor {
                 width: WIDTH,
                 height: HEIGHT,
-                title: "Snake".to_string(),
+                title: "Eyzi's Snake".to_string(),
                 resizable: false,
                 present_mode: bevy::window::PresentMode::AutoVsync,
                 ..Default::default()

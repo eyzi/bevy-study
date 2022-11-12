@@ -37,7 +37,7 @@ pub fn start() {
             window: WindowDescriptor {
                 width: WIDTH,
                 height: HEIGHT,
-                title: "Space Invade.rs".to_string(),
+                title: "Eyzi's Space Invade.rs".to_string(),
                 resizable: false,
                 present_mode: bevy::window::PresentMode::AutoVsync,
                 ..Default::default()

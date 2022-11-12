@@ -1,4 +1,4 @@
-pub const GAME_NAME: &str = "Tetris";
+pub const GAME_NAME: &str = "Eyzi's Tetris";
 pub const WINDOW_WIDTH: f32 = 480.;
 pub const WINDOW_HEIGHT: f32 = 480.;
 
