@@ -1,19 +1,81 @@
+use super::super::core::fader;
 use super::super::core::state;
 use bevy::prelude::*;
 
 pub struct StartupPlugin;
 
+#[derive(Component)]
+pub struct Splashscreen {
+    timer: Timer,
+    fader_created: bool,
+}
+
+impl Default for Splashscreen {
+    fn default() -> Self {
+        Self {
+            timer: Timer::from_seconds(2., false),
+            fader_created: false,
+        }
+    }
+}
+
 impl Plugin for StartupPlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(
-            SystemSet::on_enter(state::GameState::Startup).with_system(add_splashscreen),
+            SystemSet::on_enter(state::GameState::Splashscreen).with_system(add_splashscreen),
         )
         .add_system_set(
-            SystemSet::on_exit(state::GameState::Startup).with_system(remove_splashscreen),
+            SystemSet::on_exit(state::GameState::Splashscreen).with_system(remove_splashscreen),
+        )
+        .add_system_set(
+            SystemSet::on_update(state::GameState::Splashscreen).with_system(update_splashscreen),
         );
     }
 }
 
-fn add_splashscreen(mut _app_state: ResMut<State<state::GameState>>) {}
+fn add_splashscreen(mut commands: Commands, asset_server: ResMut<AssetServer>) {
+    let texture = asset_server.load("common/eyzi-logo.png");
 
-fn remove_splashscreen() {}
+    commands
+        .spawn()
+        .insert(Splashscreen::default())
+        .insert_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: Color::WHITE,
+                custom_size: Some(Vec2::new(1280., 720.)),
+                ..default()
+            },
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn().insert_bundle(SpriteBundle {
+                texture,
+                transform: Transform {
+                    scale: Vec3::new(0.5, 0.5, 1.),
+                    ..default()
+                },
+                ..default()
+            });
+        });
+}
+
+fn update_splashscreen(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut splashscreen_query: Query<&mut Splashscreen>,
+) {
+    if let Some(mut splashscreen) = splashscreen_query.iter_mut().next() {
+        if splashscreen.timer.just_finished() && !splashscreen.fader_created {
+            fader::create(&mut commands, 1., Color::BLUE, state::GameState::MainMenu);
+            splashscreen.fader_created = true;
+        } else {
+            splashscreen.timer.tick(time.delta());
+        }
+    }
+}
+
+fn remove_splashscreen(mut commands: Commands, splashscreen_query: Query<Entity, &Splashscreen>) {
+    if let Some(splashscreen) = splashscreen_query.iter().next() {
+        commands.entity(splashscreen).despawn_recursive();
+    }
+}

@@ -8,5 +8,6 @@ cargo run --example rpg
 ```
 
 ## Features
+- States and Menu screens
 
 ## Flaws
