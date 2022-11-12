@@ -67,7 +67,7 @@ fn update_splashscreen(
 ) {
     if let Some(mut splashscreen) = splashscreen_query.iter_mut().next() {
         if splashscreen.timer.just_finished() && !splashscreen.fader_created {
-            create_fader(&mut commands, 1., Color::BLACK, state::GameState::MainMenu);
+            create_fader(&mut commands, 0.5, Color::BLACK, state::GameState::MainMenu);
             splashscreen.fader_created = true;
         } else {
             splashscreen.timer.tick(time.delta());

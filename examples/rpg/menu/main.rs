@@ -122,7 +122,7 @@ fn handle_button(
                 MenuItem::Play => {
                     create_fader(
                         &mut commands,
-                        1.,
+                        0.5,
                         Color::BLACK,
                         state::GameState::OptionsMenu,
                     );

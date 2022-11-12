@@ -37,6 +37,5 @@ pub fn start() {
         .add_system(input::handle)
         .add_system(tetromino::populate_falling.after(input::handle))
         .add_system(tetris::check_tetris.after(tetromino::populate_falling))
-        // .add_system(screen::check_reset.after(tetris::check_tetris))
         .run();
 }

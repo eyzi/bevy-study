@@ -84,7 +84,7 @@ fn handle_button(
                 *color = BackgroundColor(Color::WHITE);
             }
             Interaction::Clicked => {
-                create_fader(&mut commands, 1., Color::BLACK, state::GameState::MainMenu);
+                create_fader(&mut commands, 0.5, Color::BLACK, state::GameState::MainMenu);
             }
         }
     }

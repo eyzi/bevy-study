@@ -83,9 +83,9 @@ pub fn persist_tetromino(
                 commands
                     .entity(*block_entity)
                     .remove::<Block>()
-                    .remove_bundle::<SpriteBundle>()
+                    .remove::<SpriteBundle>()
                     .insert(block.clone())
-                    .insert_bundle(block.sprite_bundle())
+                    .insert(block.sprite_bundle())
                     .insert(Collidable)
                     .insert(Clearable);
             }
@@ -125,9 +125,7 @@ pub fn refresh(
                         color,
                     };
                     let block_entity = grid.blocks.get(&block.coords).unwrap();
-                    commands
-                        .entity(*block_entity)
-                        .insert_bundle(block.sprite_bundle());
+                    commands.entity(*block_entity).insert(block.sprite_bundle());
                 }
             }
         }
@@ -156,9 +154,7 @@ pub fn refresh(
                         color,
                     };
                     let block_entity = grid.blocks.get(&block.coords).unwrap();
-                    commands
-                        .entity(*block_entity)
-                        .insert_bundle(block.sprite_bundle());
+                    commands.entity(*block_entity).insert(block.sprite_bundle());
                 }
             }
         }
@@ -183,9 +179,7 @@ pub fn refresh(
                             color,
                         };
                         let block_entity = grid.blocks.get(&block.coords).unwrap();
-                        commands
-                            .entity(*block_entity)
-                            .insert_bundle(block.sprite_bundle());
+                        commands.entity(*block_entity).insert(block.sprite_bundle());
                     }
                 }
             }

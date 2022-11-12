@@ -1,5 +1,5 @@
 use crate::core::state;
-use bevy::prelude::*;
+use bevy::{prelude::*, ui::FocusPolicy};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FadeDirection {
@@ -75,6 +75,7 @@ pub fn create(commands: &mut Commands, duration: f32, color: Color, next_state: 
             },
             background_color: BackgroundColor(color),
             z_index: ZIndex::Global(99),
+            focus_policy: FocusPolicy::Block,
             ..default()
         },
     ));

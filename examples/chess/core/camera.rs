@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_mod_picking::*;
+// use bevy_mod_picking::*;
 
 pub fn setup(mut commands: Commands) {
     commands.spawn(Camera3dBundle {

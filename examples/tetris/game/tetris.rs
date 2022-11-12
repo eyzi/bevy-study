@@ -5,6 +5,7 @@ use super::screen::*;
 use bevy::prelude::*;
 use bevy::utils::hashbrown::HashMap;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum AppState {
     Playing,
@@ -91,8 +92,8 @@ pub fn remove_tetris_rows(
                     block.color = color.clone();
                     commands
                         .entity(*block_entity)
-                        .remove_bundle::<SpriteBundle>()
-                        .insert_bundle(block.sprite_bundle());
+                        .remove::<SpriteBundle>()
+                        .insert(block.sprite_bundle());
                 }
             } else {
                 let block = Block {
@@ -102,10 +103,10 @@ pub fn remove_tetris_rows(
                 commands
                     .entity(*block_entity)
                     .remove::<Block>()
-                    .remove_bundle::<SpriteBundle>()
+                    .remove::<SpriteBundle>()
                     .remove::<Collidable>()
                     .insert(block.clone())
-                    .insert_bundle(block.sprite_bundle());
+                    .insert(block.sprite_bundle());
             }
         }
     }

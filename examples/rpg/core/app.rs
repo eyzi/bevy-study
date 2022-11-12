@@ -37,7 +37,7 @@ pub fn start() {
 fn fade_to_splashscreen(mut commands: Commands) {
     fader::plugin::create(
         &mut commands,
-        1.,
+        0.5,
         Color::BLACK,
         state::GameState::Splashscreen,
     );

@@ -62,10 +62,10 @@ fn setup(
         TextureAtlas::from_grid(texture_handle, Vec2::new(24.0, 24.0), 3, 1, None, None);
     let texture_atlas_handle = textures.add(texture_atlas);
 
-    commands.spawn_bundle(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle::default());
     commands
         .spawn(Player { delta_x: 0.0 })
-        .insert_bundle(SpriteSheetBundle {
+        .insert(SpriteSheetBundle {
             sprite: TextureAtlasSprite::new(0),
             texture_atlas: texture_atlas_handle.clone(),
             transform: Transform::from_translation(Vec3::new(
@@ -88,7 +88,7 @@ fn setup(
 
             commands
                 .spawn(Enemy { movement })
-                .insert_bundle(SpriteSheetBundle {
+                .insert(SpriteSheetBundle {
                     sprite: TextureAtlasSprite::new(1),
                     texture_atlas: texture_atlas_handle.clone(),
                     transform: Transform::from_translation(Vec3::new(x, y, 0.0)),
@@ -126,7 +126,7 @@ fn player(
             .clamp(-MAX_X_MOVEMENT, MAX_X_MOVEMENT);
 
         if firing {
-            commands.spawn(Laser).insert_bundle(SpriteSheetBundle {
+            commands.spawn(Laser).insert(SpriteSheetBundle {
                 texture_atlas: atlas_handle.clone(),
                 transform: Transform::from_translation(Vec3::new(
                     transform.translation.x,

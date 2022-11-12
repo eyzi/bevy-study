@@ -1,9 +1,6 @@
 use super::super::core::config;
 use super::block::{create as create_block, *};
 use super::coords::*;
-use super::gravity::*;
-use super::tetris::AppState;
-use super::tetromino::*;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 
@@ -39,36 +36,6 @@ pub fn setup(mut commands: Commands) {
     }
 
     commands.spawn(block_dictionary);
-}
-
-pub fn check_reset(
-    mut app_state: ResMut<State<AppState>>,
-    mut commands: Commands,
-    mut held_query: Query<Entity, With<Held>>,
-    mut upcoming_query: Query<Entity, With<Upcoming>>,
-    mut falling_query: Query<Entity, With<Falling>>,
-    mut clearable_query: Query<Entity, With<Clearable>>,
-) {
-    if app_state.current() == &AppState::GameOver {
-        for entity in upcoming_query.iter_mut() {
-            commands.entity(entity).despawn();
-        }
-        for entity in held_query.iter_mut() {
-            commands.entity(entity).despawn();
-        }
-        for entity in falling_query.iter_mut() {
-            commands.entity(entity).despawn();
-        }
-        for entity in clearable_query.iter_mut() {
-            commands.entity(entity).despawn();
-        }
-
-        for index in 0..3 {
-            create_upcoming(&mut commands, index, Tetromino::new(random_shape()))
-        }
-
-        app_state.set(AppState::Playing).unwrap_or_default();
-    }
 }
 
 pub fn is_border(coords: Coords) -> bool {
