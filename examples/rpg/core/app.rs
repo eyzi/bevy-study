@@ -10,7 +10,7 @@ use bevy::prelude::*;
 
 pub fn start() {
     App::new()
-        .insert_resource(ClearColor(Color::BLACK))
+        .insert_resource(ClearColor(Color::WHITE))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
                 width: config::WINDOW_WIDTH,
@@ -37,7 +37,7 @@ fn fade_to_splashscreen(mut commands: Commands) {
     fader::plugin::create(
         &mut commands,
         1.,
-        Color::BLACK,
+        Color::WHITE,
         state::GameState::Splashscreen,
     );
 }

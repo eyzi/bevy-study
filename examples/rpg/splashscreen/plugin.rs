@@ -1,5 +1,5 @@
 use super::super::core::state;
-use super::super::fader::plugin::create as create_fader;
+use super::super::fader::plugin::{create as create_fader, Fader};
 use bevy::prelude::*;
 
 pub struct SplashscreenPlugin;
@@ -7,14 +7,12 @@ pub struct SplashscreenPlugin;
 #[derive(Component)]
 pub struct Splashscreen {
     timer: Timer,
-    fader_created: bool,
 }
 
 impl Default for Splashscreen {
     fn default() -> Self {
         Self {
             timer: Timer::from_seconds(2., TimerMode::Once),
-            fader_created: false,
         }
     }
 }
@@ -64,11 +62,14 @@ fn update_splashscreen(
     mut commands: Commands,
     time: Res<Time>,
     mut splashscreen_query: Query<&mut Splashscreen>,
+    buttons: Res<Input<MouseButton>>,
+    mut fader_q: Query<&Fader>,
 ) {
     if let Some(mut splashscreen) = splashscreen_query.iter_mut().next() {
-        if splashscreen.timer.just_finished() && !splashscreen.fader_created {
+        if (buttons.just_pressed(MouseButton::Left) || splashscreen.timer.just_finished())
+            && fader_q.iter_mut().next().is_none()
+        {
             create_fader(&mut commands, 1., Color::BLACK, state::GameState::MainMenu);
-            splashscreen.fader_created = true;
         } else {
             splashscreen.timer.tick(time.delta());
         }
