@@ -1,7 +1,7 @@
-use super::camera;
-use super::config;
-use super::icon;
-use super::state;
+use crate::core::camera;
+use crate::core::config;
+use crate::core::icon;
+use crate::core::state;
 use bevy::prelude::*;
 
 pub fn start() {
