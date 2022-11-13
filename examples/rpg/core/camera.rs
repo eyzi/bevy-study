@@ -1,5 +1,8 @@
+use bevy::core_pipeline::fxaa::Fxaa;
 use bevy::prelude::*;
 
 pub fn setup(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    let mut camera_bundle = Camera2dBundle::default();
+    camera_bundle.camera.hdr = true;
+    commands.spawn((camera_bundle, Fxaa::default()));
 }

@@ -1,5 +1,5 @@
 use crate::core::state;
-use crate::fader::plugin::create as create_fader;
+use crate::fader::plugin::{create as create_fader, Fader};
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
@@ -109,6 +109,7 @@ fn handle_button(
         Changed<Interaction>,
     >,
     mut exit: EventWriter<AppExit>,
+    mut fader_q: Query<&Fader>,
 ) {
     for (interaction, menu_item, mut color) in interaction_query.iter_mut() {
         match interaction {
@@ -120,12 +121,14 @@ fn handle_button(
             }
             Interaction::Clicked => match menu_item {
                 MenuItem::Play => {
-                    create_fader(
-                        &mut commands,
-                        0.5,
-                        Color::BLACK,
-                        state::GameState::OptionsMenu,
-                    );
+                    if fader_q.iter_mut().next().is_none() {
+                        create_fader(
+                            &mut commands,
+                            0.5,
+                            Color::BLACK,
+                            state::GameState::OptionsMenu,
+                        );
+                    }
                 }
                 MenuItem::Exit => {
                     exit.send(AppExit);

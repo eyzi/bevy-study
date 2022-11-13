@@ -2,6 +2,7 @@
 
 mod core;
 mod fader;
+mod level;
 mod menu;
 mod splashscreen;
 

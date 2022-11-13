@@ -10,7 +10,6 @@ use bevy::prelude::*;
 
 pub fn start() {
     App::new()
-        .insert_resource(Msaa { samples: 4 })
         .insert_resource(ClearColor(Color::BLACK))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
