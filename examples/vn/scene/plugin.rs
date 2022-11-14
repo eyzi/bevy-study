@@ -3,16 +3,65 @@ use crate::core::state;
 use crate::fader::plugin::{create as create_fader, Fader};
 use crate::menu::plugin;
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 
 pub struct ScenePlugin;
 
 #[derive(Component)]
 pub struct SceneScreen;
 
+#[derive(Clone, Copy)]
+pub enum BevnCommandType {
+    Dialogue,
+}
+
+#[derive(Clone)]
+pub struct BevnCommand {
+    pub command_type: BevnCommandType,
+    pub speaker: String,
+    pub line: String,
+}
+
+#[derive(Resource)]
+pub struct BevnScriptTracker {
+    pub scene: String,
+    pub index: u16,
+}
+
+#[derive(Resource)]
+pub struct BevnScript {
+    pub script: HashMap<String, Vec<BevnCommand>>,
+    pub start_scene: String,
+}
+
 impl Plugin for ScenePlugin {
     fn build(&self, app: &mut App) {
+        let mut script = HashMap::<String, Vec<BevnCommand>>::new();
+        script.insert(
+            String::from("start"),
+            vec![
+                BevnCommand {
+                    command_type: BevnCommandType::Dialogue,
+                    speaker: String::from("Hana"),
+                    line: String::from("Hi, my name is Hana."),
+                },
+                BevnCommand {
+                    command_type: BevnCommandType::Dialogue,
+                    speaker: String::from("Hana"),
+                    line: String::from("This is a pen."),
+                },
+            ],
+        );
+
+        app.insert_resource(BevnScript {
+            script,
+            start_scene: String::from("start"),
+        });
+
         app.add_system_set(
-            SystemSet::on_enter(state::GameState::Playing).with_system(create_scene),
+            SystemSet::on_enter(state::GameState::Playing)
+                .with_system(create_scene)
+                .with_system(reset_tracking),
         )
         .add_system_set(
             SystemSet::on_exit(state::GameState::Playing)
@@ -21,10 +70,19 @@ impl Plugin for ScenePlugin {
                 .with_system(plugin::remove_menu_screen::<BevnUI>),
         )
         .add_system_set(
-            SystemSet::on_update(state::GameState::Playing).with_system(handle_interaction),
-        )
-        .add_system_set(SystemSet::on_update(state::GameState::Playing).with_system(animate_text));
+            SystemSet::on_update(state::GameState::Playing)
+                .with_system(handle_interaction)
+                .with_system(animate_text)
+                .with_system(manage_scene),
+        );
     }
+}
+
+pub fn reset_tracking(mut commands: Commands) {
+    commands.insert_resource(BevnScriptTracker {
+        scene: String::from("start"),
+        index: 0,
+    });
 }
 
 #[derive(Component)]
@@ -35,6 +93,9 @@ pub struct BevnUI;
 
 #[derive(Component)]
 pub struct BevnUiWho;
+
+#[derive(Component)]
+pub struct BevnUiWhoBox;
 
 #[derive(Component)]
 pub struct BevnUiWhat;
@@ -106,7 +167,7 @@ pub fn create_scene(
                     // who box
                     textbox
                         .spawn((
-                            BevnUiWho,
+                            BevnUiWhoBox,
                             NodeBundle {
                                 style: Style {
                                     size: Size::new(Val::Percent(100.), Val::Percent(20.)),
@@ -122,18 +183,21 @@ pub fn create_scene(
                             },
                         ))
                         .with_children(|who_box| {
-                            who_box.spawn(TextBundle {
-                                style: Style { ..default() },
-                                text: Text::from_section(
-                                    "Hana",
-                                    TextStyle {
-                                        font_size: 30.,
-                                        font: game_config.game_font.clone(),
-                                        color: Color::BLACK,
-                                    },
-                                ),
-                                ..default()
-                            });
+                            who_box.spawn((
+                                BevnUiWho,
+                                TextBundle {
+                                    style: Style { ..default() },
+                                    text: Text::from_section(
+                                        "",
+                                        TextStyle {
+                                            font_size: 30.,
+                                            font: game_config.game_font.clone(),
+                                            color: Color::BLACK,
+                                        },
+                                    ),
+                                    ..default()
+                                },
+                            ));
                         });
 
                     // what box
@@ -158,7 +222,7 @@ pub fn create_scene(
                             what_box.spawn((
                                 BevnUiWhat,
                                 TextAnimating {
-                                    text: String::from("Hi, my name is Hana. This is a pen."),
+                                    text: String::from(""),
                                     timer: Timer::from_seconds(0.05, TimerMode::Once),
                                 },
                                 TextBundle {
@@ -176,6 +240,30 @@ pub fn create_scene(
                         });
                 });
         });
+}
+
+pub fn manage_scene(
+    mut commands: Commands,
+    bevn_script: Res<BevnScript>,
+    bevn_script_tracker: Res<BevnScriptTracker>,
+    mut q_bevn_what: Query<(Entity, &mut Text, With<BevnUiWhat>, Without<BevnUiWho>)>,
+    mut q_bevn_who: Query<(&mut Text, With<BevnUiWho>, Without<BevnUiWhat>)>,
+) {
+    if bevn_script_tracker.is_changed() {
+        let bevn_scripts = bevn_script.script.get("start").unwrap();
+        let bevn_current_scripts = bevn_scripts[bevn_script_tracker.index as usize].clone();
+
+        if let Some((mut bevn_who, _, _)) = q_bevn_who.iter_mut().next() {
+            bevn_who.sections[0].value = bevn_current_scripts.speaker;
+            if let Some((entity, mut bevn_what, _, _)) = q_bevn_what.iter_mut().next() {
+                bevn_what.sections[0].value = String::from("");
+                commands.entity(entity).insert(TextAnimating {
+                    text: bevn_current_scripts.line,
+                    timer: Timer::from_seconds(0.05, TimerMode::Once),
+                });
+            }
+        }
+    }
 }
 
 pub fn animate_text(
@@ -205,6 +293,8 @@ pub fn handle_interaction(
     mut fader_q: Query<&Fader>,
     keyboard_event: Res<Input<KeyCode>>,
     mut q_bevn_ui: Query<(&BevnUI, &mut Visibility)>,
+    bevn_script: Res<BevnScript>,
+    mut bevn_script_tracker: ResMut<BevnScriptTracker>,
 ) {
     if keyboard_event.just_pressed(KeyCode::H) {
         if let Some((_, mut visibility)) = q_bevn_ui.iter_mut().next() {
@@ -212,12 +302,19 @@ pub fn handle_interaction(
         }
     }
 
-    if fader_q.iter_mut().next().is_none() && mouse_event.just_pressed(MouseButton::Left) {
-        create_fader(
-            &mut commands,
-            0.5,
-            Color::BLACK,
-            state::GameState::OptionsMenu,
-        );
+    if mouse_event.just_pressed(MouseButton::Left) {
+        if let Some(bevn_commands) = bevn_script.script.get("start") {
+            let next_index = (bevn_script_tracker.index + 1) as usize;
+            if next_index < bevn_commands.len() {
+                bevn_script_tracker.index += 1;
+            } else if fader_q.iter_mut().next().is_none() {
+                create_fader(
+                    &mut commands,
+                    0.5,
+                    Color::BLACK,
+                    state::GameState::OptionsMenu,
+                );
+            }
+        }
     }
 }
