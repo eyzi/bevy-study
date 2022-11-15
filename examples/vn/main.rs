@@ -2,7 +2,6 @@
 
 mod core;
 mod fader;
-mod lib;
 mod menu;
 mod scene;
 mod splashscreen;
