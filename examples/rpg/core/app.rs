@@ -7,7 +7,40 @@ use crate::menu;
 use crate::splashscreen;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_ecs_ldtk::utils::translation_to_grid_coords;
 use bevy_inspector_egui::WorldInspectorPlugin;
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
+pub struct Wall;
+
+#[derive(Clone, Debug, Default, Bundle, LdtkIntCell)]
+pub struct WallBundle {
+    wall: Wall,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
+pub struct PortalIn;
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
+pub struct PortalOut;
+
+#[derive(Clone, Debug, Default, Bundle, LdtkIntCell)]
+pub struct PortalInBundle {
+    portal: PortalIn,
+}
+
+#[derive(Clone, Debug, Default, Bundle, LdtkIntCell)]
+pub struct PortalOutBundle {
+    portal: PortalOut,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
+pub struct StartSpot;
+
+#[derive(Clone, Debug, Default, Bundle, LdtkIntCell)]
+pub struct StartSpotBundle {
+    start_spot: StartSpot,
+}
 
 pub fn start() {
     App::new()
@@ -30,6 +63,10 @@ pub fn start() {
         .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(LdtkPlugin)
         .insert_resource(LevelSelection::Index(1))
+        .register_ldtk_int_cell::<WallBundle>(1)
+        .register_ldtk_int_cell::<PortalOutBundle>(2)
+        .register_ldtk_int_cell::<StartSpotBundle>(3)
+        .register_ldtk_int_cell::<PortalInBundle>(4)
         .add_plugin(menu::plugin::MenuPlugin)
         .add_plugin(fader::plugin::FaderPlugin)
         .add_plugin(splashscreen::plugin::SplashscreenPlugin)
@@ -77,7 +114,7 @@ fn setup_map(
 
     let texture_handle = asset_server.load("rpg/Characters/Character 1.png");
     let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(24.0, 32.0), 5, 8, None, None);
+        TextureAtlas::from_grid(texture_handle, Vec2::new(24.0, 32.1), 5, 8, None, None);
     let texture_atlas_handle = textures.add(texture_atlas);
 
     commands.spawn((
@@ -86,7 +123,7 @@ fn setup_map(
             is_moving: false,
         },
         SpriteSheetBundle {
-            sprite: TextureAtlasSprite::new(5),
+            sprite: TextureAtlasSprite::new(0),
             texture_atlas: texture_atlas_handle.clone(),
             transform: Transform::from_translation(Vec3::new(135.0, 35.0, 10.0)),
             ..default()
@@ -107,6 +144,7 @@ fn move_player(
     mut q_player: Query<(&mut Transform, &mut Player)>,
     keys: Res<Input<KeyCode>>,
     time: Res<Time>,
+    q_walls: Query<(&GridCoords, &Wall)>,
 ) {
     let (mut transform, mut player) = q_player.single_mut();
 
@@ -142,9 +180,27 @@ fn move_player(
             player.facing = 3;
         }
 
-        if player.is_moving {
-            transform.translation.x += movement.x * move_by;
-            transform.translation.y += movement.y * move_by;
+        let new_point = Vec2::new(
+            transform.translation.x + (movement.x * move_by),
+            transform.translation.y + (movement.y * move_by),
+        );
+        let new_point_coords = translation_to_grid_coords(
+            Vec2::new(new_point.x, new_point.y + 2.),
+            IVec2::new(16, 16),
+        );
+
+        let mut colliding = false;
+        for (wall_coords, _) in q_walls.iter() {
+            if wall_coords.x == new_point_coords.x && wall_coords.y == new_point_coords.y {
+                colliding = true;
+            }
+        }
+
+        if !colliding {
+            transform.translation.x = new_point.x;
+            transform.translation.y = new_point.y;
+        } else {
+            player.is_moving = false;
         }
     } else {
         player.is_moving = false;
