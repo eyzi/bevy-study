@@ -184,10 +184,8 @@ fn move_player(
             transform.translation.x + (movement.x * move_by),
             transform.translation.y + (movement.y * move_by),
         );
-        let new_point_coords = translation_to_grid_coords(
-            Vec2::new(new_point.x, new_point.y + 2.),
-            IVec2::new(16, 16),
-        );
+        let new_point_coords =
+            translation_to_grid_coords(Vec2::new(new_point.x, new_point.y + 2.), IVec2::new(4, 4));
 
         let mut colliding = false;
         for (wall_coords, _) in q_walls.iter() {
