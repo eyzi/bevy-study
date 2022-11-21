@@ -137,7 +137,8 @@ fn follow_player(
 ) {
     let (mut camera, _, _) = q_camera.single_mut();
     let (player, _, _) = q_player.single();
-    camera.translation = player.translation;
+    camera.translation.x = player.translation.x;
+    camera.translation.y = player.translation.y;
 }
 
 fn move_player(
