@@ -2,6 +2,7 @@ use crate::core::camera;
 use crate::core::config;
 use crate::core::icon;
 use crate::core::state;
+use crate::dialogue;
 use crate::fader;
 use crate::menu;
 use crate::snow;
@@ -107,6 +108,7 @@ pub fn start() {
         .add_plugin(menu::plugin::MenuPlugin)
         .add_plugin(fader::plugin::FaderPlugin)
         .add_plugin(snow::SnowPlugin)
+        .add_plugin(dialogue::DialoguePlugin)
         .add_plugin(splashscreen::plugin::SplashscreenPlugin)
         .add_state(state::GameState::Startup)
         .add_startup_system(icon::setup)

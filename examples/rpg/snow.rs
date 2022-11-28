@@ -1,8 +1,7 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
 use rand::{prelude::thread_rng, Rng};
 use std::cmp;
+use std::time::Duration;
 
 const MAX_SNOW: usize = 50;
 const MAX_SNOW_SPAWN: usize = 10;
@@ -59,7 +58,7 @@ fn spawn_snow(
             let spawnable_count = cmp::min(MAX_SNOW - snow_count, MAX_SNOW_SPAWN);
             for _ in 1..thread_rng().gen_range(1..spawnable_count) {
                 let x = thread_rng().gen_range(-50f32..300f32);
-                let y = thread_rng().gen_range(-50f32..400f32);
+                let y = thread_rng().gen_range(50f32..400f32);
 
                 let random_x_speed = thread_rng().gen_range(-5f32..5f32);
                 let random_y_speed = thread_rng().gen_range(SNOW_MIN_SPEED..SNOW_MAX_SPEED);
