@@ -40,9 +40,14 @@ impl Plugin for SnowPlugin {
             .add_system_set(
                 SystemSet::on_update(SnowState::Snowing)
                     .with_system(spawn_snow)
-                    .with_system(snowfall),
+                    .with_system(snowfall)
+                    .with_system(handle_interaction),
             )
-            .add_system_set(SystemSet::on_update(SnowState::NoSnow).with_system(snowfall_off));
+            .add_system_set(
+                SystemSet::on_update(SnowState::NoSnow)
+                    .with_system(snowfall_off)
+                    .with_system(handle_interaction),
+            );
     }
 }
 
@@ -119,10 +124,41 @@ fn snowfall_off(
         if sprite.color.a() <= 0. {
             commands.entity(entity).despawn_recursive();
         } else {
-            let new_a = sprite.color.a() - (0.1 * time.delta_seconds());
+            let new_a = sprite.color.a() - (1. * time.delta_seconds());
             sprite.color.set_a(new_a);
             transform.translation.x += snow.speed.x * time.delta_seconds();
             transform.translation.y -= snow.speed.y * time.delta_seconds();
         }
+    }
+}
+
+#[derive(Resource)]
+pub struct InteractionTimer {
+    timer: Timer,
+}
+
+impl Default for InteractionTimer {
+    fn default() -> Self {
+        Self {
+            timer: Timer::from_seconds(0.1, TimerMode::Once),
+        }
+    }
+}
+
+fn handle_interaction(
+    key_code: Res<Input<KeyCode>>,
+    mut snow_state: ResMut<State<SnowState>>,
+    mut interaction_timer: Local<InteractionTimer>,
+    time: Res<Time>,
+) {
+    if interaction_timer.timer.finished() && key_code.just_pressed(KeyCode::O) {
+        match snow_state.current() {
+            SnowState::Snowing => snow_state.set(SnowState::NoSnow).unwrap(),
+            SnowState::NoSnow => snow_state.set(SnowState::Snowing).unwrap(),
+        };
+
+        *interaction_timer = InteractionTimer::default();
+    } else {
+        interaction_timer.timer.tick(time.delta());
     }
 }
