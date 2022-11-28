@@ -25,6 +25,7 @@ pub struct Entrance {
     entrance_id: &'static str,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Debug, Default, Component)]
 pub struct Portal {
     entrance_id: String,
@@ -285,6 +286,7 @@ fn update_sprite(
     *sprite = TextureAtlasSprite::new(sprite_texture_index);
 }
 
+#[allow(dead_code)]
 fn fade_to_splashscreen(mut commands: Commands) {
     fader::plugin::create(
         &mut commands,
