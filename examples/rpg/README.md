@@ -11,13 +11,14 @@ cargo run --example rpg
 
 ```
    [W]          [I][O]
-[A][S][D]
+[A][S][D][F]
 ```
 
 - `W` to move up
 - `A` to move left
 - `S` to move down
 - `D` to move right
+- `F` to toggle fullscreen
 - `I` to open/close dialogue box
 - `O` to start/end snow
 
@@ -29,6 +30,7 @@ cargo run --example rpg
 - LDTK map import and entity/intgrid parsing
 - Snow mechanics
 - Dialogue mechanics
+- Fullscreen Mode
 
 ## Flaws
 - Dialogues are not organic interactions

@@ -115,6 +115,7 @@ pub fn start() {
         .add_startup_system(camera::setup)
         // .add_startup_system(fade_to_splashscreen)
         .add_startup_system(setup_map)
+        .add_system(handle_fullscreen)
         .add_system(move_player)
         .add_system(update_sprite.after(move_player))
         .add_system(follow_player.after(move_player))
@@ -139,6 +140,16 @@ impl Default for SpriteIndex {
             index: 0u8,
             timer: Timer::from_seconds(1. / 8., TimerMode::Repeating),
         }
+    }
+}
+
+fn handle_fullscreen(key_code: Res<Input<KeyCode>>, mut windows: ResMut<Windows>) {
+    if key_code.just_pressed(KeyCode::F) {
+        let window = windows.primary_mut();
+        match window.mode() {
+            WindowMode::Windowed => window.set_mode(WindowMode::BorderlessFullscreen),
+            _ => window.set_mode(WindowMode::Windowed),
+        };
     }
 }
 
