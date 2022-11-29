@@ -9,7 +9,7 @@ use crate::snow;
 use crate::splashscreen;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
-use bevy_ecs_ldtk::utils::translation_to_grid_coords;
+use bevy_ecs_ldtk::utils::{grid_coords_to_translation, translation_to_grid_coords};
 use bevy_inspector_egui::WorldInspectorPlugin;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
@@ -20,16 +20,12 @@ pub struct WallBundle {
     wall: Wall,
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
-pub struct Entrance {
-    entrance_id: &'static str,
-}
-
 #[allow(dead_code)]
 #[derive(Clone, Debug, Default, Component)]
 pub struct Portal {
-    entrance_id: String,
     level_id: i32,
+    map_x: i32,
+    map_y: i32,
 }
 
 #[derive(Clone, Debug, Default, Bundle)]
@@ -47,30 +43,37 @@ impl LdtkEntity for PortalBundle {
         _: &AssetServer,
         _: &mut Assets<TextureAtlas>,
     ) -> Self {
-        let level_id = layer_instance.level_id;
-        let mut entrance_id = String::from("");
+        let mut level_id = 0;
+        let mut map_x = 0;
+        let mut map_y = 0;
 
         for field_instance in &entity_instance.field_instances {
-            if field_instance.identifier == "EntranceId" {
-                if let FieldValue::String(Some(e_id)) = &field_instance.value {
-                    entrance_id = e_id.to_string();
+            if field_instance.identifier == "Level" {
+                if let FieldValue::Int(Some(found_level_id)) = &field_instance.value {
+                    level_id = found_level_id.clone();
+                }
+            }
+            if field_instance.identifier == "X" {
+                if let FieldValue::Int(Some(found_map_x)) = &field_instance.value {
+                    map_x = found_map_x.clone();
+                }
+            }
+            if field_instance.identifier == "Y" {
+                if let FieldValue::Int(Some(found_map_y)) = &field_instance.value {
+                    map_y = found_map_y.clone();
                 }
             }
         }
 
         Self {
             portal: Portal {
-                entrance_id,
+                map_x,
+                map_y,
                 level_id,
             },
             grid_coords: GridCoords::from_entity_info(entity_instance, layer_instance),
         }
     }
-}
-
-#[derive(Clone, Debug, Default, Bundle, LdtkEntity)]
-pub struct EntranceBundle {
-    entrance: Entrance,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
@@ -101,11 +104,9 @@ pub fn start() {
         )
         .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(LdtkPlugin)
-        .insert_resource(LevelSelection::Index(1))
+        .insert_resource(LevelSelection::Index(0))
         .register_ldtk_int_cell::<WallBundle>(1)
-        .register_ldtk_entity::<StartSpotBundle>("Start")
-        // .register_ldtk_entity::<PortalBundle>("Portal")
-        // .register_ldtk_entity::<EntranceBundle>("Entrance")
+        .register_ldtk_entity::<PortalBundle>("Portal")
         .add_plugin(menu::plugin::MenuPlugin)
         .add_plugin(fader::plugin::FaderPlugin)
         .add_plugin(snow::SnowPlugin)
@@ -120,6 +121,7 @@ pub fn start() {
         .add_system(move_player)
         .add_system(update_sprite.after(move_player))
         .add_system(follow_player.after(move_player))
+        .add_system(use_portal.after(move_player))
         .run();
 }
 
@@ -193,13 +195,33 @@ fn follow_player(
     camera.translation.y = player.translation.y;
 }
 
+fn use_portal(
+    mut commands: Commands,
+    mut q_player: Query<(&mut Transform, &Player)>,
+    q_portals: Query<(&GridCoords, &Portal), Without<Player>>,
+) {
+    for (mut transform, _) in q_player.iter_mut() {
+        for (coords, portal) in q_portals.iter() {
+            let current_player_coords =
+                translation_to_grid_coords(transform.translation.truncate(), IVec2::new(16, 16));
+            if coords.x == current_player_coords.x && coords.y == current_player_coords.y {
+                commands.insert_resource(LevelSelection::Index(portal.level_id as usize));
+                let new_coords = grid_coords_to_translation(
+                    GridCoords::new(portal.map_x, portal.map_y),
+                    IVec2::new(16, 16),
+                );
+                transform.translation.x = new_coords.x;
+                transform.translation.y = new_coords.y;
+            }
+        }
+    }
+}
+
 fn move_player(
     mut q_player: Query<(&mut Transform, &mut Player)>,
     keys: Res<Input<KeyCode>>,
     time: Res<Time>,
     q_walls: Query<(&GridCoords, &Wall)>,
-    // q_portals: Query<(&GridCoords, &Portal)>,
-    // q_entrances: Query<(&GridCoords, &Entrance)>,
 ) {
     for (mut transform, mut player) in q_player.iter_mut() {
         if keys.any_pressed([KeyCode::W, KeyCode::A, KeyCode::S, KeyCode::D]) {

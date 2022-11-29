@@ -31,10 +31,11 @@ cargo run --example rpg
 - Snow mechanics
 - Dialogue mechanics
 - Fullscreen Mode
+- Map change mechanics
 
 ## Flaws
 - Dialogues are not organic interactions
 - Map is not loaded in a proper state
 - No animation/cut scene mechanics yet
-- No map change mechanics yet
 - Not really a "game" tbh
+- Snowing inside the house
